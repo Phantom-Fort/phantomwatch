@@ -1,0 +1,7 @@
+{
+    "APP_NAME": "PhantomWatch",
+    "LOG_LEVEL": "INFO",
+    "DB_TYPE": "sqlite",
+    "DB_NAME": "phantomwatch.db",
+    "API_TIMEOUT": 30
+}

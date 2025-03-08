@@ -1,0 +1,34 @@
+# Byte-compiled files
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+logs/
+*.log
+
+# Virtual environments
+venv/
+env/
+
+# System-specific files
+.DS_Store
+Thumbs.db
+
+# Database files
+database/*.db
+database/*.sqlite
+database/*.sqlite3
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.iml
+
+# Dependencies
+*.egg-info/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Install scripts (if generated)
+install.sh~
