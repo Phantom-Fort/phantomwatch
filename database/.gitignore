@@ -1,0 +1,19 @@
+# Ignore SQLite database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Ignore database logs
+*.log
+
+# Ignore cache and temporary files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore backups
+*.bak
+*.dump
+
+# Ignore VS Code workspace files (if applicable)
+.vscode/

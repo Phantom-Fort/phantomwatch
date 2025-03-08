@@ -1,0 +1,24 @@
+
+# CLI-related dependencies
+click
+argparse
+rich
+
+# Environment & Configuration Management
+python-dotenv
+
+# Database dependencies
+
+# Security & Threat Intelligence Modules
+requests
+yara-python
+sigma-cli
+
+# Logging & Debugging
+loguru
+coloredlogs
+
+# Utility and Performance
+tqdm
+tabulate
+psutil
