@@ -17,7 +17,7 @@ class OutputFormatter:
     DISABLE_COLORS = os.getenv("DISABLE_COLORS", "false").lower() == "true"
 
     # Configure Loguru
-    logger.add("phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+    logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
 
     @staticmethod
     def format_message(message, msg_type="info"):
@@ -39,11 +39,19 @@ class OutputFormatter:
         else:
             logger.info(message)
 
+class OutputFormatter:
     @staticmethod
     def print_message(message, msg_type="info"):
-        """Prints a formatted message and logs it."""
-        print(OutputFormatter.format_message(message, msg_type))
-        OutputFormatter.log_message(message, msg_type)
+        colors = {
+            "info": "\033[94m",     # Blue
+            "success": "\033[92m",  # Green
+            "warning": "\033[93m",  # Yellow
+            "error": "\033[91m",    # Red
+            "reset": "\033[0m"
+        }
+
+        color = colors.get(msg_type, colors["info"])
+        print(f"{color}{message}{colors['reset']}")  # Print without logging
 
     @staticmethod
     def format_table(data, headers=None):

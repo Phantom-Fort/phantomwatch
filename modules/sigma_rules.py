@@ -1,11 +1,13 @@
-import sqlite3
 import json
 import requests
 import os
+import sys
 import yaml
 from datetime import datetime
-from utils import get_api_key, log_message, init_db, store_result, store_sigma_match
-from config import CONFIG  # Import config file
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from .utils import get_api_key, log_event, init_db, store_result, store_sigma_match
+from config.config import CONFIG  # Import config file
 
 # Database Initialization
 init_db()
@@ -25,13 +27,13 @@ def fetch_threat_intel(ioc_type, value):
             results["VirusTotal"] = response.json()
             store_result(ioc_type, value, "VirusTotal")
         except requests.exceptions.RequestException as e:
-            log_message(f"VirusTotal API request failed: {e}")
+            log_event(f"[ERROR] VirusTotal API request failed: {e}")
 
     return results
 
 def load_sigma_rules(rule_file):
     if not os.path.exists(rule_file):
-        log_message(f"Sigma rule file not found: {rule_file}")
+        log_event(f"[ERROR] Sigma rule file not found: {rule_file}")
         return {"rules": []}
 
     try:
@@ -39,19 +41,19 @@ def load_sigma_rules(rule_file):
             rules = yaml.safe_load(f)
         return rules
     except yaml.YAMLError as e:
-        log_message(f"Error parsing Sigma rules YAML: {e}")
+        log_event(f"[ERROR] Error parsing Sigma rules YAML: {e}")
         return {"rules": []}
 
 def apply_sigma_rules(log_file, sigma_rules):
     if not os.path.exists(log_file):
-        log_message(f"Log file not found: {log_file}")
+        log_event(f"[ERROR] Log file not found: {log_file}")
         return []
 
     try:
         with open(log_file, "r") as f:
             logs = f.readlines()
     except Exception as e:
-        log_message(f"Error reading log file: {e}")
+        log_event(f"[ERROR] Error reading log file: {e}")
         return []
 
     matches = []
@@ -72,9 +74,9 @@ def save_output(results, filename):
     try:
         with open(filename, "w") as f:
             json.dump(results, f, indent=4)
-        log_message(f"Output saved to {filename}")
+        log_event(f"[INFO] Output saved to {filename}")
     except Exception as e:
-        log_message(f"Failed to save output: {e}")
+        log_event(f"[ERROR] Failed to save output: {e}")
 
 if __name__ == "__main__":
     ioc_type = "ip"

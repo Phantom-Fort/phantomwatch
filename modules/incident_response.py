@@ -5,8 +5,8 @@ import subprocess
 import shutil
 import psutil
 from datetime import datetime
-from .utils import get_api_key, log_message, init_db, store_result, log_incident, fetch_threat_intel
-from config import CONFIG  # Import config
+from .utils import get_api_key, log_event, init_db, store_result, log_incident, fetch_threat_intel, save_output
+from config.config import CONFIG  # Import config
 
 # Database setup
 init_db()
@@ -52,3 +52,4 @@ if __name__ == "__main__":
     value = "1.1.1.1"
     results = fetch_threat_intel(ioc_type, value)
     save_output(results, "report.json")
+    log_event("[*] Threat intelligence report saved.")

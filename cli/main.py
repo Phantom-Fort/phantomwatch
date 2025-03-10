@@ -3,27 +3,36 @@ import time
 import sys
 import json
 import os
-import logging
-from dotenv import load_dotenv
 from loguru import logger
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from core.banner import display_banner
 from core.soc_tips import get_random_tips
 from core.output_formatter import OutputFormatter
 from modules import incident_response, siem_correlation, sigma_rules, threat_intel, yara_scan
+from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-# Configure Loguru
-logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+# Remove default handlers
+logger.remove()
 
-# Load configuration
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config/config.json")
+# Add a simpler handler for terminal output (no timestamps or log levels)
+logger.add(sys.stdout, format="{message}", level="INFO")
+
+logger.add(".." "logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+
+
+# Correct config path to reference the parent directory
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config", "config.json")
+CONFIG_PATH = os.path.normpath(CONFIG_PATH)  # Normalize the path for cross-platform compatibility
+
 try:
     with open(CONFIG_PATH, "r") as config_file:
         CONFIG = json.load(config_file)
 except (FileNotFoundError, json.JSONDecodeError) as e:
-    logger.error(f"Failed to load config: {e}")
+    logger.error(f"Failed to load config from {CONFIG_PATH}: {e}")
     sys.exit(1)
 
 # Dynamically load modules from config

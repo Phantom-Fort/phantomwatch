@@ -2,15 +2,16 @@ import yara
 import os
 import json
 from datetime import datetime
-from config import get_config, CONFIG
-from utils import log_event, init_db, store_result
+from config.config import CONFIG
+
+from .utils import log_event, init_db, store_result
 
 # Initialize database
 init_db()
 
 # Get paths from config
 YARA_RULES_DIR = CONFIG.get("SIGMA_RULES_PATH", "rules/yara/")
-SAMPLE_FILE = get_config("SAMPLE_FILE", "samples/malware.exe")
+SAMPLE_FILE = CONFIG.get("SAMPLE_FILE", "samples/malware.exe")
 SCAN_OUTPUT_FILE = CONFIG.get("THREAT_INTEL_REPORT", "output/yara_scan_results.json")
 
 def load_yara_rules():

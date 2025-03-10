@@ -1,19 +1,22 @@
 import argparse
 import json
 import os
-from dotenv import load_dotenv
+import sys
 from loguru import logger
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from core.output_formatter import OutputFormatter
 from modules import incident_response, siem_correlation, sigma_rules, threat_intel, yara_scan
+from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
 # Configure Loguru
-logger.add("phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add(".." "logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
 
 # Load configuration file
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config/config.json")
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), ".." "config/config.json")
 
 try:
     with open(CONFIG_PATH, "r") as config_file:

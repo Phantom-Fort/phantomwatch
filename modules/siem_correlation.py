@@ -1,8 +1,12 @@
 import sqlite3
 import json
 from datetime import datetime
-from utils import log_message, init_db, store_result
-from config import CONFIG  # Import config
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from .utils import log_event, init_db, store_result
+from config.config import CONFIG  # Import config
 
 # Initialize Database
 init_db()
@@ -49,7 +53,7 @@ def correlate_events():
     with open(output_file, "w") as f:
         json.dump(correlation_results, f, indent=4)
     
-    log_message(f"Correlated {len(correlation_results)} events. Output saved to {output_file}")
+    log_event(f"[INFO] Correlated {len(correlation_results)} events. Output saved to {output_file}")
     return correlation_results
 
 if __name__ == "__main__":

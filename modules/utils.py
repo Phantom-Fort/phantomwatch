@@ -1,33 +1,57 @@
 import os
+from datetime import datetime
 import json
-from loguru import logger, logging
-import sqlite3
+from loguru import logger
 from dotenv import load_dotenv
-from config import get_config, CONFIG
+import sqlite3
+from config.config import CONFIG
 
 # Load environment variables
 load_dotenv("config/secrets.env")
 
 # Ensure necessary directories exist
-os.makedirs(CONFIG["QUARANTINE_DIR"], exist_ok=True)
-os.makedirs(os.path.dirname(CONFIG["LOG_FILE"]), exist_ok=True)
+os.makedirs(CONFIG.get("QUARANTINE_DIR", "quarantine"), exist_ok=True)
+os.makedirs(os.path.dirname(CONFIG.get("LOG_FILE", "logs/phantomwatch.log")), exist_ok=True)
 
 # Logging Configuration
-logging.basicConfig(
-    filename=CONFIG["LOG_FILE"],
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logger.remove()
+logger.add(CONFIG.get("LOG_FILE", "logs/phantomwatch.log"), rotation="10MB", level="INFO", format="{time} - {level} - {message}")
 
 def log_event(message, level="info"):
     """Log events to the log file."""
     level_map = {
-        "info": logging.info,
-        "warning": logging.warning,
-        "error": logging.error
+        "info": logger.info,
+        "warning": logger.warning,
+        "error": logger.error
     }
-    level_map.get(level, logging.info)(message)
-    print(f"[*] {message}")
+    level_map.get(level, logger.info)(message)
+
+def log_incident(action, target, status):
+    """Log an incident response action."""
+    conn = sqlite3.connect(CONFIG.get("DATABASE_PATH", "phantomwatch.db"))
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO incident_response (action, target, status, timestamp) VALUES (?, ?, ?, datetime('now'))",
+        (action, target, status)
+    )
+    conn.commit()
+    conn.close()
+    log_event(f"[*] Incident logged: {action} on {target} (Status: {status})")
+
+def fetch_threat_intel(ioc_type, value):
+    """Fetch threat intelligence from the database."""
+    conn = sqlite3.connect(CONFIG.get("DATABASE_PATH", "phantomwatch.db"))
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM threat_intel WHERE ioc_type=? AND value=?", (ioc_type, value))
+    result = cursor.fetchall()
+    conn.close()
+    return result
+
+def save_output(file_path, data):
+    """Save scan results or logs to an output file."""
+    with open(file_path, "w") as file:
+        json.dump(data, file, indent=4)
+    log_event(f"[*] Output saved to {file_path}")
 
 def load_config():
     """Load non-sensitive configuration settings from config.json."""
@@ -60,6 +84,35 @@ def get_api_key(service_name):
     if not api_key:
         log_event(f"[!] API key for {service_name} is missing!", "error")
     return api_key
+
+def store_sigma_match(rule_name, description, log_entry, filename="sigma_matches.json"):
+    """Stores Sigma match details in a JSON file and logs the event."""
+    match = {
+        "rule_name": rule_name,
+        "description": description,
+        "log_entry": log_entry
+    }
+    
+    # Check if file exists and read existing data
+    if os.path.exists(filename):
+        with open(filename, "r") as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                data = []
+    else:
+        data = []
+
+    # Append new match
+    data.append(match)
+
+    # Write back to file
+    with open(filename, "w") as f:
+        json.dump(data, f, indent=4)
+
+    # Log the event
+    log_event(f"[*] Sigma match stored: Rule - {rule_name}, Description - {description}")
+
 
 def init_db():
     """Initialize the database if it doesn’t exist."""
@@ -94,7 +147,7 @@ def init_db():
 
     conn.commit()
     conn.close()
-    log_event("[*] Database initialized successfully.")
+    log_event("Database initialized successfully.")
 
 def store_result(table, file, rule_name, severity="Medium"):
     """Store scan results in the database."""
