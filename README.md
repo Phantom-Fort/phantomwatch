@@ -27,7 +27,7 @@ Ensure your system has the following installed:
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/your-repo/phantomwatch.git
+   git clone https://github.com/Phantom-Fort/phantomwatch.git
    cd phantomwatch
    ```
 
