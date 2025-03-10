@@ -8,7 +8,7 @@ from loguru import logger
 from core.banner import display_banner
 from core.soc_tips import get_random_tips
 from core.output_formatter import OutputFormatter
-from modules import incident_response, siem_correlation, sigma_rules, threat_intel, yara_scan, utils
+from modules import incident_response, siem_correlation, sigma_rules, threat_intel, yara_scan
 
 # Load environment variables
 load_dotenv()
