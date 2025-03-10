@@ -5,7 +5,7 @@ import subprocess
 import shutil
 import psutil
 from datetime import datetime
-from utils import get_api_key, log_message, init_db, store_result, log_incident
+from .utils import get_api_key, log_message, init_db, store_result, log_incident, fetch_threat_intel
 from config import CONFIG  # Import config
 
 # Database setup

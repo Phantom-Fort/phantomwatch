@@ -1,6 +1,6 @@
 import os
 import json
-from loguru import logger
+from loguru import logger, logging
 import sqlite3
 from dotenv import load_dotenv
 from config import get_config, CONFIG
