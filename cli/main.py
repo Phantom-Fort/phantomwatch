@@ -3,6 +3,7 @@ import time
 import sys
 import json
 import os
+import logging
 from dotenv import load_dotenv
 from loguru import logger
 from core.banner import display_banner
@@ -14,7 +15,7 @@ from modules import incident_response, siem_correlation, sigma_rules, threat_int
 load_dotenv()
 
 # Configure Loguru
-logger.add("phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
 
 # Load configuration
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config/config.json")

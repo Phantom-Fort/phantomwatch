@@ -28,6 +28,6 @@ except (FileNotFoundError, json.JSONDecodeError) as e:
 # Import CLI components
 from .commands import execute_command
 from .menu import display_menu
-from .output_formatter import format_output
+from core.output_formatter import format_output
 
 __all__ = ["execute_command", "display_menu", "format_output", "CONFIG"]
