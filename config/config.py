@@ -15,7 +15,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG = {
     **json_config,  # Merge JSON config into CONFIG
     "DATABASE_PATH": os.path.abspath("database/phantomwatch.db"),
-    "LOG_FILE": os.path.join(BASE_DIR, "logs", "phantomwatch.log"),
+    "LOG_FILE": os.path.join(BASE_DIR, "..", "logs", "phantomwatch.log"),
     "SIGMA_RULES_PATH": os.path.join(BASE_DIR, "config", "sigma_rules.yml"),
     "LOG_FILE_PATH": os.path.join(BASE_DIR, "logs", "system.log"),
     "THREAT_INTEL_REPORT": os.path.join(BASE_DIR, "output", "report.json"),

@@ -1,23 +1,22 @@
-import argparse
-import json
 import os
 import sys
+import argparse
+import json
 from loguru import logger
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from core.output_formatter import OutputFormatter
-from modules import incident_response, siem_correlation, sigma_rules, threat_intel, yara_scan
 from dotenv import load_dotenv
+from commands import list_modules, execute_module, interactive_shell, set_api_key
 
 # Load environment variables
 load_dotenv()
 
-# Configure Loguru
-logger.add(".." "logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+# Configure Loguru logger
+logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
 
 # Load configuration file
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), ".." "config/config.json")
-
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "../config/config.json")
 try:
     with open(CONFIG_PATH, "r") as config_file:
         CONFIG = json.load(config_file)
@@ -26,47 +25,23 @@ except (FileNotFoundError, json.JSONDecodeError) as e:
     OutputFormatter.print_message("[-] Error: Failed to load configuration file.", "error")
     exit(1)
 
-# Dynamically load modules from config
-MODULES = {
-    module_name: globals().get(module_name.replace("-", "_"))
-    for module_name in CONFIG.get("modules", [])
-}
-
-def list_modules():
-    """Lists available modules."""
-    OutputFormatter.print_message("\nAvailable Modules:", "info")
-    for mod in MODULES.keys():
-        OutputFormatter.print_message(f"  - {mod}", "success")
-    print("")
-
-def execute_module(module):
-    """Executes the specified module."""
-    if module in MODULES and MODULES[module]:
-        OutputFormatter.print_message(f"[+] Running module: {module}\n", "info")
-        try:
-            MODULES[module].run()
-            logger.success(f"Successfully executed module: {module}")
-        except AttributeError:
-            OutputFormatter.print_message("[-] Error: Selected module does not have a 'run' function.", "error")
-            logger.error(f"Module '{module}' is missing a 'run' function.")
-    else:
-        OutputFormatter.print_message("[-] Invalid module specified. Use 'list-modules' to view available modules.", "error")
-        logger.warning(f"Invalid module specified: {module}")
 
 def main():
-    """Main entry point for the PhantomWatch menu system."""
-    parser = argparse.ArgumentParser(description="PhantomWatch Interactive Menu")
-    parser.add_argument("command", choices=["list-modules", "run"], help="Command to execute")
-    parser.add_argument("-m", "--module", help="Specify module to run (if applicable)")
+    """Main entry point for PhantomWatch CLI."""
+    parser = argparse.ArgumentParser(description="PhantomWatch Interactive CLI")
+    parser.add_argument("-l", "--list", action="store_true", help="List all available modules")
+    parser.add_argument("-m", "--module", help="Run a specific module")
+    parser.add_argument("--set-api", nargs=2, metavar=("SERVICE", "API_KEY"), help="Set API key for a service")
     args = parser.parse_args()
     
-    if args.command == "list-modules":
+    if args.list:
         list_modules()
-    elif args.command == "run":
-        if args.module:
-            execute_module(args.module)
-        else:
-            OutputFormatter.print_message("[-] Error: Please specify a module with -m <module_name>.", "error")
+    elif args.module:
+        execute_module(args.module)
+    elif args.set_api:
+        set_api_key(args.set_api[0], args.set_api[1])
+    else:
+        interactive_shell()
 
 if __name__ == "__main__":
     main()

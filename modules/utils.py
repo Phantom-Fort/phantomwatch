@@ -11,11 +11,11 @@ load_dotenv("config/secrets.env")
 
 # Ensure necessary directories exist
 os.makedirs(CONFIG.get("QUARANTINE_DIR", "quarantine"), exist_ok=True)
-os.makedirs(os.path.dirname(CONFIG.get("LOG_FILE", "logs/phantomwatch.log")), exist_ok=True)
+os.makedirs(os.path.dirname(CONFIG.get("LOG_FILE", "../logs/phantomwatch.log")), exist_ok=True)
 
 # Logging Configuration
 logger.remove()
-logger.add(CONFIG.get("LOG_FILE", "logs/phantomwatch.log"), rotation="10MB", level="INFO", format="{time} - {level} - {message}")
+logger.add(CONFIG.get("LOG_FILE", "../logs/phantomwatch.log"), rotation="10MB", level="INFO", format="{time} - {level} - {message}")
 
 def log_event(message, level="info"):
     """Log events to the log file."""

@@ -2,15 +2,32 @@
 
 echo "[+] Installing PhantomWatch as a system package..."
 
-# Update package lists
-echo "[+] Updating package lists..."
-sudo apt update -y
-
 # Install system dependencies
 echo "[+] Installing required system dependencies..."
-sudo apt install -y python3 python3-pip sqlite3
+sudo apt update
+sudo apt install -y sqlite3 curl
 
-# Create a virtual environment
+# Download and install YARA binary
+echo "[+] Downloading YARA binary..."
+YARA_VERSION="4.3.2"  # Change version if needed
+ARCH=$(uname -m)
+YARA_URL="https://github.com/VirusTotal/yara/releases/download/v$YARA_VERSION/yara-${YARA_VERSION}-${ARCH}.tar.gz"
+
+curl -L $YARA_URL -o yara.tar.gz
+mkdir -p yara_bin
+tar -xzf yara.tar.gz -C yara_bin --strip-components=1
+sudo mv yara_bin/yara /usr/local/bin/
+rm -rf yara_bin yara.tar.gz
+
+# Verify YARA installation
+if ! command -v yara &> /dev/null; then
+    echo "[ERROR] YARA installation failed!"
+    exit 1
+else
+    echo "[+] YARA installed successfully!"
+fi
+
+# Set up Python virtual environment
 echo "[+] Setting up Python virtual environment..."
 python3 -m venv venv
 source venv/bin/activate

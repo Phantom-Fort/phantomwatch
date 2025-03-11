@@ -17,7 +17,7 @@ class OutputFormatter:
     DISABLE_COLORS = os.getenv("DISABLE_COLORS", "false").lower() == "true"
 
     # Configure Loguru
-    logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+    logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
 
     @staticmethod
     def format_message(message, msg_type="info"):
@@ -84,7 +84,7 @@ class OutputFormatter:
         """Prints a visual divider line."""
         divider = char * length
         print(divider)
-        OutputFormatter.log_message(divider, "info")
+        OutputFormatter.print_message(divider, "info")
 
     @staticmethod
     def print_header(title):

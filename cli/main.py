@@ -9,8 +9,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from core.banner import display_banner
 from core.soc_tips import get_random_tips
 from core.output_formatter import OutputFormatter
-from modules import incident_response, siem_correlation, sigma_rules, threat_intel, yara_scan
 from dotenv import load_dotenv
+from commands import handle_command
+from menu import interactive_shell
 
 # Load environment variables
 load_dotenv()
@@ -20,13 +21,11 @@ logger.remove()
 
 # Add a simpler handler for terminal output (no timestamps or log levels)
 logger.add(sys.stdout, format="{message}", level="INFO")
+logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
 
-logger.add(".." "logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
-
-
-# Correct config path to reference the parent directory
+# Load configuration file
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config", "config.json")
-CONFIG_PATH = os.path.normpath(CONFIG_PATH)  # Normalize the path for cross-platform compatibility
+CONFIG_PATH = os.path.normpath(CONFIG_PATH)
 
 try:
     with open(CONFIG_PATH, "r") as config_file:
@@ -34,12 +33,6 @@ try:
 except (FileNotFoundError, json.JSONDecodeError) as e:
     logger.error(f"Failed to load config from {CONFIG_PATH}: {e}")
     sys.exit(1)
-
-# Dynamically load modules from config
-MODULES = {
-    module_name: globals().get(module_name.replace("-", "_"))
-    for module_name in CONFIG.get("modules", [])
-}
 
 def initialize_phantomwatch():
     """Displays ASCII art, initializes PhantomWatch, and prints SOC tips."""
@@ -63,46 +56,27 @@ def initialize_phantomwatch():
         for char in tip:
             sys.stdout.write(char)
             sys.stdout.flush()
-            time.sleep(0.05)  # Typing effect
+            time.sleep(0.05)
         print("\n")
         time.sleep(2)
 
-    OutputFormatter.print_message("\n[+] Use --help to view available commands.", "success")
-    OutputFormatter.print_message("[+] Note: 'utils' is not a module but contains universal parameters.", "warning")
+    OutputFormatter.print_message("\n[+] Use 'help' to view the help page.", "success")
     OutputFormatter.print_divider()
 
-def execute_command(command, module):
-    """Executes the specified command with an optional module."""
-    if command == "list-modules":
-        OutputFormatter.print_message("\nAvailable Modules:", "info")
-        for mod in MODULES.keys():
-            OutputFormatter.print_message(f"  - {mod}", "success")
-        print("")
-    elif command == "run" and module:
-        if module in MODULES and MODULES[module]:
-            OutputFormatter.print_message(f"Running module: {module}\n", "info")
-            try:
-                MODULES[module].run()
-                logger.success(f"Successfully executed module: {module}")
-            except AttributeError:
-                OutputFormatter.print_message(f"Error: Selected module '{module}' does not have a 'run' function.", "error")
-                logger.error(f"Module '{module}' is missing a 'run' function.")
-        else:
-            OutputFormatter.print_message(f"Invalid module '{module}'. Use 'list-modules' to view available modules.", "error")
-            logger.warning(f"Invalid module specified: {module}")
-    else:
-        OutputFormatter.print_message("Invalid command. Use --help for available commands.", "error")
-        logger.warning(f"Invalid command used: {command}")
-
 def main():
-    """Entry point for PhantomWatch CLI using argparse."""
-    parser = argparse.ArgumentParser(description="PhantomWatch: Security Automation CLI")
-    parser.add_argument("command", help="Command to execute")
-    parser.add_argument("-m", "--module", help="Specify module to use")
+    """Entry point for PhantomWatch CLI."""
+    parser = argparse.ArgumentParser(description="PhantomWatch Interactive CLI")
+    parser.add_argument("-l", "--list", action="store_true", help="List all available modules")
+    parser.add_argument("-m", "--module", help="Run a specific module")
+    parser.add_argument("--set-api", nargs=2, metavar=("SERVICE", "API_KEY"), help="Set API key for a service")
     args = parser.parse_args()
 
     initialize_phantomwatch()
-    execute_command(args.command, args.module)
+    
+    if args.command:
+        handle_command(args.command)
+    else:
+        interactive_shell()
 
 if __name__ == "__main__":
     main()

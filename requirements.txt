@@ -6,18 +6,17 @@ rich
 
 # Environment & Configuration Management
 python-dotenv
+argparse
 
-# Database dependencies
+# Logging & Debugging
+loguru
+coloredlogs
 
 # Security & Threat Intelligence Modules
 requests
 yara-python
 sigma-cli
-yaml
-
-# Logging & Debugging
-loguru
-coloredlogs
+pyyaml
 
 # Utility and Performance
 tqdm
