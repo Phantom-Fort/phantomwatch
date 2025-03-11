@@ -1,4 +1,3 @@
-import argparse
 import json
 import os
 import sys
@@ -18,43 +17,6 @@ load_dotenv()
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "../config/config.json")
 with open(CONFIG_PATH, "r") as config_file:
     CONFIG = json.load(config_file)
-
-def handle_command(command):
-    """Processes user commands interactively."""
-    parts = command.strip().split()
-    
-    if not parts:
-        return  # Ignore empty input
-    
-    cmd = parts[0].lower()
-    args = parts[1:] if len(parts) > 1 else []
-
-    if cmd == "-l":
-        list_modules()
-    
-    elif cmd == "run":
-        if args:
-            module = args[0]
-            execute_module(module)
-        else:
-            OutputFormatter.print_message("[-] Error: Specify a module with 'run <module>'", "error")
-
-    elif cmd == "set-api":
-        if len(args) < 2:
-            OutputFormatter.print_message("[-] Error: Usage - set-api <SERVICE> <API_KEY>", "error")
-        else:
-            set_api_key(args[0], args[1])
-
-    elif cmd == "view-api":
-        view_api_keys()
-
-    elif cmd in ["exit", "quit"]:
-        OutputFormatter.print_message("[+] Exiting PhantomWatch...", "info")
-        sys.exit(0)
-
-    else:
-        OutputFormatter.print_message(f"[-] Unknown command: {cmd}. ", "error")
-        logger.warning(f"Invalid command received: {cmd}")
 
 # Define module-specific flags
 MODULE_FLAGS = {
@@ -94,9 +56,32 @@ def execute_module(module):
     if module in MODULES:
         OutputFormatter.print_message(f"[+] Running module: {module}\n", "info")
 
+        # Check if the module requires an API key
+        required_api_key = MODULES[module].REQUIRED_API_KEY if hasattr(MODULES[module], "REQUIRED_API_KEY") else None
+        
+        if required_api_key:
+            api_keys = dotenv_values(os.path.join(os.path.dirname(__file__), "../.env"))
+
+            if required_api_key not in api_keys or not api_keys[required_api_key].strip():
+                OutputFormatter.print_message(f"[-] Error: The module '{module}' requires the API key '{required_api_key}' to be set.", "error")
+                
+                set_key = input(f"Do you want to set the API key for '{required_api_key}' now? (y/n): ").strip().lower()
+                if set_key == "y":
+                    new_api_key = input(f"Enter the API key for '{required_api_key}': ").strip()
+                    if new_api_key:
+                        with open(os.path.join(os.path.dirname(__file__), "../.env"), "a") as env_file:
+                            env_file.write(f"\n{required_api_key}={new_api_key}")
+                        OutputFormatter.print_message(f"[+] API key for '{required_api_key}' has been set.", "success")
+                    else:
+                        OutputFormatter.print_message("[-] No API key provided. Module execution aborted.", "error")
+                        return
+                else:
+                    OutputFormatter.print_message("[-] API key not set. Module execution aborted.", "error")
+                    return
+
         # Handle multiple flags for modules like threat-intel
         if module == "threat-intel":
-            flag_choice = input("Enter the flag to use (`1` for ip address / `2` for domain): ").strip()
+            flag_choice = input("Enter the flag to use (`1` for IP address / `2` for domain): ").strip()
             if flag_choice == "1":
                 flag = "ip address"
             elif flag_choice == "2":
@@ -124,7 +109,6 @@ def execute_module(module):
     else:
         OutputFormatter.print_message("[-] Invalid module specified. Use 'list-modules' to list available modules.", "error")
         logger.warning(f"Invalid module specified: {module}")
-
 
 def list_modules():
     """Lists available modules."""
@@ -206,15 +190,7 @@ def view_api_keys():
 
 
 def main():
-    """Entry point for the PhantomWatch CLI."""
-    parser = argparse.ArgumentParser(description="PhantomWatch Command Interface")
-    parser.add_argument("cli", nargs="?", help="Start the interactive shell")
-    args = parser.parse_args()
-    
-    if args.cli:
-        interactive_shell()
-    else:
-        parser.print_help()
+    interactive_shell()
 
 
 if __name__ == "__main__":

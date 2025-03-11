@@ -34,11 +34,12 @@ def display_help():
 
     {GREEN}Module Management:{RESET}
       {BOLD}list-modules{RESET}                   → List all available modules
-      {BOLD}use <module name>{RESET}           → Select a module (changes prompt)
+      {BOLD}use <module name>{RESET}              → Select a module (changes prompt)
       {BOLD}run{RESET}                            → Run the currently selected module
       {BOLD}run <module name>{RESET}              → Run a specific module
       {BOLD}phantomwatch -m <module>{RESET}       → Run a module using the CLI
       {BOLD}view-api{RESET}                       → View configured API keys
+      
 
     {GREEN}Configuration:{RESET}
       {BOLD}set-api <SERVICE> <API_KEY>{RESET}    → Set API key for a specific service

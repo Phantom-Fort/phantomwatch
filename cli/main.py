@@ -1,4 +1,3 @@
-import argparse
 import time
 import sys
 import json
@@ -10,7 +9,6 @@ from core.banner import display_banner
 from core.soc_tips import get_random_tips
 from core.output_formatter import OutputFormatter
 from dotenv import load_dotenv
-from commands import handle_command
 from menu import interactive_shell
 
 # Load environment variables
@@ -65,18 +63,8 @@ def initialize_phantomwatch():
 
 def main():
     """Entry point for PhantomWatch CLI."""
-    parser = argparse.ArgumentParser(description="PhantomWatch Interactive CLI")
-    parser.add_argument("-l", "--list", action="store_true", help="List all available modules")
-    parser.add_argument("-m", "--module", help="Run a specific module")
-    parser.add_argument("--set-api", nargs=2, metavar=("SERVICE", "API_KEY"), help="Set API key for a service")
-    args = parser.parse_args()
-
     initialize_phantomwatch()
-    
-    if args.command:
-        handle_command(args.command)
-    else:
-        interactive_shell()
+    interactive_shell()
 
 if __name__ == "__main__":
     main()
