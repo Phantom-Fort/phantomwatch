@@ -42,13 +42,14 @@ def fetch_threat_intel(ioc_type, value):
     """Fetch threat intelligence from the database."""
     conn = sqlite3.connect(CONFIG.get("DATABASE_PATH", "phantomwatch.db"))
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM threat_intel WHERE ioc_type=? AND value=?", (ioc_type, value))
+    cursor.execute("SELECT * FROM threat_intel WHERE type=? AND indicator=?", (ioc_type, value))
     result = cursor.fetchall()
     conn.close()
     return result
 
-def save_output(file_path, data):
-    """Save scan results or logs to an output file."""
+def save_output(data, file_path):
+    if isinstance(data, list):  
+        data = {"results": data}  # Wrap list in a dictionary for JSON compatibility
     with open(file_path, "w") as file:
         json.dump(data, file, indent=4)
     log_event(f"[*] Output saved to {file_path}")

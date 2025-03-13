@@ -7,18 +7,49 @@ echo "[+] Installing required system dependencies..."
 sudo apt update
 sudo apt install -y sqlite3 curl
 
-# Download and install YARA binary
-echo "[+] Downloading YARA binary..."
-YARA_VERSION="4.3.2"  # Change version if needed
+echo "[+] Checking for the latest YARA version..."
+YARA_LATEST=$(curl -s https://api.github.com/repos/VirusTotal/yara/releases/latest | grep -oP '"tag_name": "\K(.*?)(?=")')
+
+if [[ -z "$YARA_LATEST" ]]; then
+    echo "[-] Error: Unable to fetch the latest YARA version."
+    exit 1
+fi
+
+echo "[+] Latest YARA version found: $YARA_LATEST"
+
 ARCH=$(uname -m)
-YARA_URL="https://github.com/VirusTotal/yara/releases/download/v$YARA_VERSION/yara-${YARA_VERSION}-${ARCH}.tar.gz"
+if [[ "$ARCH" == "x86_64" ]]; then
+    ARCH="amd64"
+elif [[ "$ARCH" == "aarch64" ]]; then
+    ARCH="arm64"
+fi
 
-curl -L $YARA_URL -o yara.tar.gz
-mkdir -p yara_bin
-tar -xzf yara.tar.gz -C yara_bin --strip-components=1
-sudo mv yara_bin/yara /usr/local/bin/
-rm -rf yara_bin yara.tar.gz
+YARA_URL="https://github.com/VirusTotal/yara/releases/download/${YARA_LATEST}/yara-${YARA_LATEST}-${ARCH}.tar.gz"
 
+echo "[+] Downloading YARA binary from $YARA_URL..."
+wget -q --show-progress "$YARA_URL" -O yara.tar.gz
+
+if [[ $? -ne 0 ]]; then
+    echo "[-] Error: Failed to download YARA binary."
+    exit 1
+fi
+
+echo "[+] Extracting YARA..."
+tar -xzf yara.tar.gz
+cd yara-* || exit 1
+
+echo "[+] Installing YARA..."
+sudo make && sudo make install
+
+if [[ $? -eq 0 ]]; then
+    echo "[+] YARA installation completed successfully!"
+else
+    echo "[-] Error: YARA installation failed."
+fi
+
+echo "[+] Cleaning up..."
+cd ..
+rm -rf yara* yara.tar.gz
 # Verify YARA installation
 if ! command -v yara &> /dev/null; then
     echo "[ERROR] YARA installation failed!"

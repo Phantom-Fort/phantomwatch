@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import readline
 from loguru import logger
 from dotenv import load_dotenv, set_key, dotenv_values
 
@@ -117,55 +118,89 @@ def list_modules():
         OutputFormatter.print_message(f"  - {mod}", "success")
     print("")
 
-def interactive_shell():
-    """Starts the interactive PhantomWatch shell."""
-    OutputFormatter.print_message("\n[+] Welcome to PhantomWatch CLI. Type 'help' for a list of commands.\n", "info")
 
+# List of commands for auto-completion
+
+COMMANDS = ["help", "list-modules", "view-api", "use", "run", "set-api", "clear", "exit", "quit", "run {module}", "set-api {service} {api_key}", "use {module}"]
+
+
+def completer(text, state):
+    options = [cmd for cmd in COMMANDS if cmd.startswith(text)]
+    return options[state] if state < len(options) else None
+
+# Enable tab completion and command history
+readline.parse_and_bind("tab: complete")
+readline.set_completer(completer)
+
+def interactive_shell():
+    """Starts the enhanced interactive PhantomWatch shell."""
+    OutputFormatter.print_message("\n[+] Welcome to PhantomWatch CLI. Type 'help' for a list of commands.\n", "info")
+    
     selected_module = None  # Tracks the currently selected module
 
     while True:
         try:
             prompt = f"phantomwatch{f'/{selected_module}' if selected_module else ''}> "
             cmd = input(prompt).strip()
+            
+            if not cmd:
+                continue  # Ignore empty commands
 
-            if cmd in ["exit", "quit"]:
+            logger.info(f"Command entered: {cmd}")
+
+            if cmd.lower() in ["exit", "quit"]:
                 OutputFormatter.print_message("[+] Exiting PhantomWatch CLI...", "info")
                 break
-            elif cmd == "help":
+
+            elif cmd.lower() == "help":
                 display_help()
-            elif cmd == "list-modules":
+
+            elif cmd.lower() == "list-modules":
                 list_modules()
-            elif cmd == "view-api":
+
+            elif cmd.lower() == "view-api":
                 view_api_keys()
-            elif cmd.startswith("use "):
+
+            elif cmd.lower() == "clear":
+                os.system("clear")
+
+            elif cmd.lower().startswith("use "):
                 module = cmd.split(" ", 1)[1]
                 if module in MODULES:
                     selected_module = module
                     OutputFormatter.print_message(f"[+] Selected module: {module}", "success")
                 else:
                     OutputFormatter.print_message("[-] Error: Invalid module. Use 'list-modules' to view available modules.", "error")
-            elif cmd == "run":
+
+            elif cmd.lower() == "run":
                 if selected_module:
                     OutputFormatter.print_message(f"[+] Running selected module: {selected_module}", "info")
                     execute_module(selected_module)
-                    os.system(f"phantomwatch -m {selected_module}")  # Execute via CLI
+                    os.system(f"phantomwatch -m {selected_module}")  # Execute via CLI, if applicable
                 else:
-                    OutputFormatter.print_message("[-] No module selected. Use 'select <module>' first.", "error")
-            elif cmd.startswith("run "):
+                    OutputFormatter.print_message("[-] No module selected. Use 'use <module>' first.", "error")
+
+            elif cmd.lower().startswith("run "):
                 module = cmd.split(" ", 1)[1]
                 execute_module(module)
-                os.system(f"phantomwatch -m {module}")  # Execute via CLI
-            elif cmd.startswith("set-api "):
+                os.system(f"phantomwatch -m {module}")  # Execute via CLI, if applicable
+
+            elif cmd.lower().startswith("set-api "):
                 parts = cmd.split()
                 if len(parts) == 3:
                     set_api_key(parts[1], parts[2])
                 else:
                     OutputFormatter.print_message("[-] Usage: set-api <SERVICE> <API_KEY>", "error")
+
             else:
                 OutputFormatter.print_message("[-] Invalid command. Type 'help' for a list of commands.", "error")
         except KeyboardInterrupt:
             OutputFormatter.print_message("\n[+] Exiting PhantomWatch CLI...", "info")
             break
+        except Exception as e:
+            logger.error(f"Error: {e}")
+            OutputFormatter.print_message("[-] An error occurred. Check logs for details.", "error")
+
 
 def set_api_key(service, api_key):
     """Sets an API key in the .env file."""
