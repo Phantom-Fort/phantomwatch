@@ -58,80 +58,83 @@ MODULES = {
     "exploit-finder": exploit_finder,
 }
 
+def get_user_inputs(module):
+    """Prompt the user for required inputs based on the module's flags."""
+    if module not in MODULE_FLAGS:
+        OutputFormatter.print_message(f"[-] Error: Unknown module '{module}'.", "error")
+        return None  # Exit if module is invalid
 
-def get_required_flags(module):
-    """Prompts user for required flags before executing a module."""
-    required_flags = MODULE_FLAGS.get(module, [])
+    flags = MODULE_FLAGS[module]
     user_inputs = {}
 
-    for flag in required_flags:
-        value = input(f"Enter value for {flag}: ").strip()
-        if value:
-            user_inputs[flag] = value
-        else:
-            OutputFormatter.print_message(f"[-] Error: {flag} is required.", "error")
-            return None  # Exit if a required input is missing
+    # If multiple flags exist, prompt the user to select one
+    if len(flags) > 1:
+        print(f"[INFO] The '{module}' module has multiple flag options:")
+        for i, flag in enumerate(flags, start=1):
+            print(f"  {i}. {flag}")
 
-    return user_inputs
+        flag_choice = input("Enter the number corresponding to the flag you want to use: ").strip()
+        try:
+            flag_choice = int(flag_choice)
+            if 1 <= flag_choice <= len(flags):
+                selected_flag = flags[flag_choice - 1]
+            else:
+                OutputFormatter.print_message(f"[-] Error: Invalid choice '{flag_choice}' for module '{module}'.", "error")
+                return None
+        except ValueError:
+            OutputFormatter.print_message(f"[-] Error: Please enter a valid number for module '{module}'.", "error")
+            return None
+    else:
+        selected_flag = flags[0]  # Use the only available flag
+
+    user_inputs[selected_flag] = input(f"Enter the {selected_flag}: ").strip()
+    return user_inputs  # Return user input as a dictionary
+
 
 def execute_module(module):
     """Executes the specified module after collecting necessary inputs."""
-    if module in MODULES:
-        OutputFormatter.print_message(f"[+] Running module: {module}\n", "info")
-
-        # Check if the module requires an API key
-        required_api_key = MODULES[module].REQUIRED_API_KEY if hasattr(MODULES[module], "REQUIRED_API_KEY") else None
-        
-        if required_api_key:
-            api_keys = dotenv_values(os.path.join(os.path.dirname(__file__), "../.env"))
-
-            if required_api_key not in api_keys or not api_keys[required_api_key].strip():
-                OutputFormatter.print_message(f"[-] Error: The module '{module}' requires the API key '{required_api_key}' to be set.", "error")
-                
-                set_key = input(f"Do you want to set the API key for '{required_api_key}' now? (y/n): ").strip().lower()
-                if set_key == "y":
-                    new_api_key = input(f"Enter the API key for '{required_api_key}': ").strip()
-                    if new_api_key:
-                        with open(os.path.join(os.path.dirname(__file__), "../.env"), "a") as env_file:
-                            env_file.write(f"\n{required_api_key}={new_api_key}")
-                        OutputFormatter.print_message(f"[+] API key for '{required_api_key}' has been set.", "success")
-                    else:
-                        OutputFormatter.print_message("[-] No API key provided. Module execution aborted.", "error")
-                        return
-                else:
-                    OutputFormatter.print_message("[-] API key not set. Module execution aborted.", "error")
-                    return
-
-        # Handle multiple flags for modules like threat-intel
-        if module == "threat-intel":
-            flag_choice = input("Enter the flag to use (`1` for IP address / `2` for domain): ").strip()
-            if flag_choice == "1":
-                flag = "ip address"
-            elif flag_choice == "2":
-                flag = "domain"
-            else:
-                OutputFormatter.print_message(f"[-] Error: Invalid choice '{flag_choice}' for module '{module}'.", "error")
-                return  # Exit function if invalid choice
-            
-            user_inputs = {flag: input(f"Enter the {flag}: ").strip()}  # Prompt user for input
-        
-        else:
-            # Get required flags from user
-            user_inputs = get_required_flags(module)
-
-        if not user_inputs:
-            return  # Abort execution if missing input
-
-        try:
-            # Pass user inputs as arguments to the module's run() function
-            MODULES[module].run(**user_inputs)
-            logger.success(f"Successfully executed module: {module}")
-        except AttributeError:
-            log_event("[-] Error: Selected module does not have a 'run' function.", "error")
-            logger.error(f"Module '{module}' is missing a 'run' function.")
-    else:
+    if module not in MODULES:
         OutputFormatter.print_message("[-] Invalid module specified. Use 'list-modules' to list available modules.", "error")
         logger.warning(f"Invalid module specified: {module}")
+        return
+
+    OutputFormatter.print_message(f"[+] Running module: {module}\n", "info")
+
+    # Check if the module requires an API key
+    required_api_key = getattr(MODULES[module], "REQUIRED_API_KEY", None)
+
+    if required_api_key:
+        api_keys = dotenv_values(os.path.join(os.path.dirname(__file__), "../.env"))
+
+        if required_api_key not in api_keys or not api_keys[required_api_key].strip():
+            OutputFormatter.print_message(f"[-] Error: The module '{module}' requires the API key '{required_api_key}' to be set.", "error")
+            
+            set_key = input(f"Do you want to set the API key for '{required_api_key}' now? (y/n): ").strip().lower()
+            if set_key == "y":
+                new_api_key = input(f"Enter the API key for '{required_api_key}': ").strip()
+                if new_api_key:
+                    with open(os.path.join(os.path.dirname(__file__), "../.env"), "a") as env_file:
+                        env_file.write(f"\n{required_api_key}={new_api_key}")
+                    OutputFormatter.print_message(f"[+] API key for '{required_api_key}' has been set.", "success")
+                else:
+                    OutputFormatter.print_message("[-] No API key provided. Module execution aborted.", "error")
+                    return
+            else:
+                OutputFormatter.print_message("[-] API key not set. Module execution aborted.", "error")
+                return
+
+    # Collect user inputs
+    user_inputs = get_user_inputs(module)
+    if not user_inputs:
+        return  # Abort execution if missing input
+
+    try:
+        # Pass user inputs as arguments to the module's run() function
+        MODULES[module].run(**user_inputs)
+        logger.success(f"Successfully executed module: {module}")
+    except AttributeError:
+        OutputFormatter.print_message("[-] Error: Selected module does not have a 'run' function.", "error")
+        logger.error(f"Module '{module}' is missing a 'run' function.")
 
 def list_modules():
     """Lists available modules."""
