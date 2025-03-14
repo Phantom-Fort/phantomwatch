@@ -9,7 +9,18 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from core.output_formatter import OutputFormatter
 from modules.utils import log_event
 from core.help import display_help
-from modules import incident_response, siem_correlation, sigma_rules, threat_intel, yara_scan
+from modules import (
+    incident_response, 
+    siem_analysis, 
+    threat_intel, 
+    yara_scan, 
+    malware_analysis, 
+    osint_recon, 
+    forensic_analysis, 
+    websec_scanner, 
+    network_scanner, 
+    exploit_finder
+)
 
 # Load environment variables from .env
 load_dotenv()
@@ -22,20 +33,31 @@ with open(CONFIG_PATH, "r") as config_file:
 # Define module-specific flags
 MODULE_FLAGS = {
     "incident-response": ["log file path"],
-    "siem-correlation": ["siem-log file path"],
-    "sigma-rules": ["log file path"],
-    "threat-intel": ["ip address", "domain"],
+    "siem-analysis": ["siem-log file path"],
+    "threat-intel": ["ip address", "domain", "hash"],
     "yara-scan": ["file"],
+    "malware-analysis": ["sample file"],
+    "osint-recon": ["domain", "email", "ip address"],
+    "forensic-analysis": ["disk image", "memory dump"],
+    "websec-scanner": ["url"],
+    "network-scanner": ["network range"],
+    "exploit-finder": ["cve-id", "software name"],
 }
 
 # Load available modules
 MODULES = {
     "incident-response": incident_response,
-    "siem-correlation": siem_correlation,
-    "sigma-rules": sigma_rules,
+    "siem-analysis": siem_analysis,
     "threat-intel": threat_intel,
     "yara-scan": yara_scan,
+    "malware-analysis": malware_analysis,
+    "osint-recon": osint_recon,
+    "forensic-analysis": forensic_analysis,
+    "websec-scanner": websec_scanner,
+    "network-scanner": network_scanner,
+    "exploit-finder": exploit_finder,
 }
+
 
 def get_required_flags(module):
     """Prompts user for required flags before executing a module."""

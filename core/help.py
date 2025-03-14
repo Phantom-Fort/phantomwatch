@@ -46,37 +46,71 @@ def display_help():
       {BOLD}Example:{RESET} {RED}set-api VIRUSTOTAL 1234567890abcdef1234567890abcdef{RESET}
 
     {BOLD}{YELLOW}────────────────────────────────────────────────────────────────────
-    Available Modules & Descriptions:{RESET}
-    
-    {BOLD}1️⃣ Incident Response {RESET}({GREEN}incident-response{RESET})
-       {BLUE}- Assists in handling security incidents efficiently.{RESET}
-       {BLUE}- Provides tools to analyze logs, detect intrusions, and respond to threats.{RESET}
-       🔹 {RED}No API key required.{RESET}
+            Available Modules & Descriptions:{RESET}
+Modules:
+        1. Incident Response (`incident-response`)
+          - Parses logs, analyzes system events, and runs automated response playbooks.
+          - Tools: LogParser, Volatility
+          - API: None
+        
+        2. SIEM Analysis (`siem-analysis`)
+          - Correlates logs from multiple sources and applies Sigma rules for threat detection.
+          - Tools: Elasticsearch, Sigma
+          - API: ElasticSearch API
+        
+        3. Threat Intelligence (`threat-intel`)
+          - Queries threat databases for malicious indicators (IPs, domains, files).
+          - Tools: VirusTotal, AbuseIPDB
+          - API: VirusTotal API, AbuseIPDB API
+        
+        4. YARA Scan (`yara-scan`)
+          - Scans files and memory for malware using YARA rules.
+          - Tools: YARA, HybridAnalysis
+          - API: HybridAnalysis API
+        
+        5. Malware Analysis (`malware-analysis`)
+          - Performs static and dynamic malware analysis.
+          - Tools: ANY.RUN, HybridAnalysis
+          - API: ANY.RUN API, HybridAnalysis API
+        
+        6. OSINT Recon (`osint-recon`)
+          - Collects open-source intelligence on domains, emails, and infrastructure.
+          - Tools: Shodan, Hunter.io
+          - API: Shodan API, Hunter.io API
+        
+        7. Forensic Analysis (`forensic-analysis`)
+          - Extracts forensic artifacts from disk images, memory dumps, and logs.
+          - Tools: Autopsy, Volatility
+          - API: None
+        
+        8. Web App Security (`websec-scanner`)
+          - Scans web applications for vulnerabilities like XSS, SQLi, etc.
+          - Tools: SecurityTrails, OWASP ZAP
+          - API: SecurityTrails API
+        
+        9. Network Scanner (`network-scanner`)
+          - Performs network reconnaissance, port scanning, and service enumeration.
+          - Tools: Nmap, Masscan
+          - API: None
+        
+        10. Exploit Finder (`exploit-finder`)
+            - Searches for public exploits related to CVE IDs and software versions.
+            - Tools: Exploit-DB
+            - API: Exploit-DB API
+        
+        API Setup:
+        Use the following command to set an API key for a module:
+        ```
+        set-api <SERVICE> <API_KEY>
+        ```
+        Example:
+        ```
+        set-api VIRUSTOTAL abc123xyz
+        ```
+        """ + f"""
 
-    {BOLD}2️⃣ SIEM Correlation {RESET}({GREEN}siem-correlation{RESET})
-       {BLUE}- Correlates logs and events from multiple sources to identify threats.{RESET}
-       {BLUE}- Integrates with **ElasticSearch** for enhanced log analysis.{RESET}
-       🔹 {YELLOW}Requires:{RESET} {BOLD}set-api ELASTICSEARCH <API_KEY>{RESET}
-
-    {BOLD}3️⃣ Sigma Rules {RESET}({GREEN}sigma-rules{RESET})
-       {BLUE}- Uses Sigma rules to detect security threats in log files.{RESET}
-       {BLUE}- Converts Sigma rules into SIEM-specific formats.{RESET}
-       🔹 {RED}No API key required.{RESET}
-
-    {BOLD}4️⃣ Threat Intelligence {RESET}({GREEN}threat-intel{RESET})
-       {BLUE}- Collects threat intelligence from multiple sources.{RESET}
-       {BLUE}- Analyzes IPs, domains, and files for malicious activity.{RESET}
-       🔹 {YELLOW}Requires:{RESET} 
-         - {BOLD}set-api VIRUSTOTAL <API_KEY>{RESET} ({RED}VirusTotal{RESET})
-         - {BOLD}set-api ABUSEIPDB <API_KEY>{RESET} ({RED}AbuseIPDB{RESET})
-
-    {BOLD}5️⃣ YARA Scan {RESET}({GREEN}yara-scan{RESET})
-       {BLUE}- Scans files and memory using **YARA** signatures.{RESET}
-       {BLUE}- Helps detect malware, exploits, and suspicious activity.{RESET}
-       🔹 {YELLOW}Requires:{RESET} {BOLD}set-api HYBRIDANALYSIS <API_KEY>{RESET} ({RED}HybridAnalysis{RESET})
-
-    {BOLD}{YELLOW}────────────────────────────────────────────────────────────────────
-    Additional Information:{RESET}
+    {BOLD}{YELLOW}────────────────────────────────────────────────────────────────────{RESET}
+    {BOLD}Additional Information:{RESET}
       - Use {BOLD}'list-modules'{RESET} to see all available modules.
       - Ensure you have the correct API keys configured where necessary.
       - For more details, check the official PhantomWatch documentation.

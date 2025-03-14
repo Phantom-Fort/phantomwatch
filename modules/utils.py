@@ -162,6 +162,26 @@ def store_result(table, file, rule_name, severity="Medium"):
     conn.close()
     log_event(f"[*] Stored result in {table}: {rule_name} -> {file} (Severity: {severity})")
 
+def store_siem_results(table_name, data):
+    conn = sqlite3.connect(CONFIG["DATABASE_PATH"])
+    cursor = conn.cursor()
+    cursor.execute(f"DELETE FROM {table_name}")  # Keep only the latest results
+    for entry in data:
+        cursor.execute(f"INSERT INTO {table_name} (timestamp, data) VALUES (?, ?)",
+                       (datetime.now(), json.dumps(entry)))
+    conn.commit()
+    conn.close()
+
+# Retrieve results by command
+def get_saved_results(table_name):
+    conn = sqlite3.connect(CONFIG["DATABASE_PATH"])
+    cursor = conn.cursor()
+    query = f"SELECT * FROM {table_name} ORDER BY timestamp DESC LIMIT 1"
+    cursor.execute(query)
+    results = cursor.fetchall()
+    conn.close()
+    return results
+
 def check_requirements():
     """Ensure all necessary configurations are in place before running the modules."""
     required_keys = ["VT", "MISP", "OTX"]
