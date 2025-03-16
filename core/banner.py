@@ -10,7 +10,7 @@ def is_connected():
     except OSError:
         return False
 
-font_list = {"slant", "sub-zero", "block", "bubble", "digital", "ivrit", "lean", "mini", "script", "shadow", "speed", "standard", "term", "3D-ASCII"}
+font_list = {"slant", "sub-zero", "bubble", "digital", "ivrit", "lean", "script", "shadow", "speed", "standard", "term", "3D-ASCII"}
 
 def generate_ascii_art(text, width=80):
     """Generate ASCII art for the given text using pyfiglet."""

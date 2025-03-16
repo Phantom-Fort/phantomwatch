@@ -146,7 +146,7 @@ def list_modules():
 
 # List of commands for auto-completion
 
-COMMANDS = ["help", "list-modules", "view-api", "use", "run", "set-api", "clear", "exit", "quit", "run {module}", "set-api {service} {api_key}", "use {module}"]
+COMMANDS = ["help", "back", "list-modules", "view-api", "use", "run", "set-api", "clear", "exit", "quit", "run {module}", "set-api {service} {api_key}", "use {module}"]
 
 
 def completer(text, state):
@@ -179,6 +179,10 @@ def interactive_shell():
 
             elif cmd.lower() == "help":
                 display_help()
+
+            elif cmd.lower() == "back":
+                selected_module = None
+                OutputFormatter.print_message("[+] Module deselected.", "info")
 
             elif cmd.lower() == "list-modules":
                 list_modules()
@@ -245,8 +249,9 @@ def view_api_keys():
         return
 
     OutputFormatter.print_message("[+] Configured API Keys:", "info")
-    for key in api_keys:
-        print(f"  - {key}: [HIDDEN]")  # Hide actual values
+    for key, value in api_keys.items():
+        hidden_value = value[:2] + "*" * (len(value) - 4) + value[-2:]  # Show first 2 and last 2 characters
+        print(f"  - {key}: {hidden_value}")
 
 
 def main():
