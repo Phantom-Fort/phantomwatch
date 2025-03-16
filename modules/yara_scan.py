@@ -16,7 +16,7 @@ init_db()
 YARA_RULES_DIR = CONFIG.get("SIGMA_RULES_PATH", "rules/yara/")
 SAMPLE_FILE = CONFIG.get("SAMPLE_FILE", "samples/malware.exe")
 SCAN_OUTPUT_FILE = CONFIG.get("THREAT_INTEL_REPORT", "output/yara_scan_results.json")
-HYBRID_ANALYSIS_API_KEY = CONFIG.get("HYBRID_ANALYSIS_API_KEY", "")
+HYBRID_ANALYSIS_API_KEY = CONFIG.get("HYBRIDANALYSIS_API_KEY", "")
 
 
 def scan_file_with_yara(file_path):

@@ -97,7 +97,7 @@ def display_help():
     {BOLD}Module{RESET}                     {BOLD}Required API{RESET}
     ─────────────────────────────────────────────────────────────────────
     SIEM Analysis                      ElasticSearch API
-    Threat Intelligence                VirusTotal API, AbuseIPDB API
+    Threat Intelligence                VirusTotal API, AbuseIPDB API, MISP API, OTX API
     YARA Scan                          HybridAnalysis API
     Malware Analysis                   ANY.RUN API, HybridAnalysis API
     OSINT Recon                        Shodan API, Hunter.io API

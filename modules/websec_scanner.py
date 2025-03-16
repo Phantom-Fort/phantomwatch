@@ -18,7 +18,7 @@ def is_wordpress(url):
 
 def passive_recon(domain):
     """Perform passive reconnaissance using SecurityTrails API."""
-    api_key = CONFIG.get("SECURITYTRAILS_API")
+    api_key = CONFIG.get("SECURITYTRAILS_API_KEY")
     if not api_key:
         log_event("SecurityTrails API key not found.", "error")
         return {}

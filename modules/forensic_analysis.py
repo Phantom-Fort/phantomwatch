@@ -12,9 +12,9 @@ from .utils import log_event, init_db, store_result
 init_db()
 
 # Paths from config
-DISK_IMAGE = CONFIG.get("DISK_IMAGE_PATH", "samples/disk_image.dd")
-MEMORY_DUMP = CONFIG.get("MEMORY_DUMP_PATH", "samples/memory.dmp")
-ANALYSIS_OUTPUT = CONFIG.get("FORENSIC_REPORT", "output/forensic_results.json")
+DISK_IMAGE = CONFIG.get("DISK_IMAGE_PATH", "../samples/disk_image.dd")
+MEMORY_DUMP = CONFIG.get("MEMORY_DUMP_PATH", "../samples/memory.dmp")
+ANALYSIS_OUTPUT = CONFIG.get("FORENSIC_REPORT", "../output/forensic_reports.json")
 
 
 def analyze_disk(image_path):

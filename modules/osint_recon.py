@@ -10,7 +10,7 @@ from config.config import CONFIG
 from .utils import log_event, store_result
 
 def shodan_scan(target):
-    api_key = CONFIG.get("SHODAN_API")
+    api_key = CONFIG.get("SHODAN_API_KEY")
     if not api_key:
         log_event("Shodan API key not configured!", "error")
         return None
@@ -25,7 +25,7 @@ def shodan_scan(target):
         return None
 
 def hunter_email_lookup(domain):
-    api_key = CONFIG.get("HUNTER_API")
+    api_key = CONFIG.get("HUNTER_API_KEY")
     if not api_key:
         log_event("Hunter.io API key not configured!", "error")
         return None

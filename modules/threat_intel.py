@@ -16,7 +16,7 @@ def fetch_threat_intel(ioc_type, value):
     
     with requests.Session() as session:  # Optimize network calls
         # VirusTotal API
-        VT_API_KEY = get_api_key("VT_API_KEY")
+        VT_API_KEY = get_api_key("VIRUSTOTAL_API_KEY")
         if VT_API_KEY:
             try:
                 vt_url = f"https://www.virustotal.com/api/v3/{ioc_type}/{value}"
