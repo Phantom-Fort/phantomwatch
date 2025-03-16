@@ -14,7 +14,7 @@ def display_help():
 
     help_text = f"""
     {BOLD}{YELLOW}────────────────────────────────────────────────────────────────────
-                    PhantomWatch CLI - Interactive Shell
+                   PhantomWatch CLI - Interactive Shell
     ─────────────────────────────────────────────────────────────────────{RESET}
 
     {BLUE}PhantomWatch is a cybersecurity tool designed for threat detection, 
@@ -46,68 +46,61 @@ def display_help():
       {BOLD}Example:{RESET} {RED}set-api VIRUSTOTAL 1234567890abcdef1234567890abcdef{RESET}
 
     {BOLD}{YELLOW}────────────────────────────────────────────────────────────────────
-            Available Modules & Descriptions:{RESET}
-Modules:
-        1. Incident Response (`incident-response`)
-          - Parses logs, analyzes system events, and runs automated response playbooks.
-          - Tools: LogParser, Volatility
-          - API: None
-        
-        2. SIEM Analysis (`siem-analysis`)
-          - Correlates logs from multiple sources and applies Sigma rules for threat detection.
-          - Tools: Elasticsearch, Sigma
-          - API: ElasticSearch API
-        
-        3. Threat Intelligence (`threat-intel`)
-          - Queries threat databases for malicious indicators (IPs, domains, files).
-          - Tools: VirusTotal, AbuseIPDB
-          - API: VirusTotal API, AbuseIPDB API
-        
-        4. YARA Scan (`yara-scan`)
-          - Scans files and memory for malware using YARA rules.
-          - Tools: YARA, HybridAnalysis
-          - API: HybridAnalysis API
-        
-        5. Malware Analysis (`malware-analysis`)
-          - Performs static and dynamic malware analysis.
-          - Tools: ANY.RUN, HybridAnalysis
-          - API: ANY.RUN API, HybridAnalysis API
-        
-        6. OSINT Recon (`osint-recon`)
-          - Collects open-source intelligence on domains, emails, and infrastructure.
-          - Tools: Shodan, Hunter.io
-          - API: Shodan API, Hunter.io API
-        
-        7. Forensic Analysis (`forensic-analysis`)
-          - Extracts forensic artifacts from disk images, memory dumps, and logs.
-          - Tools: Autopsy, Volatility
-          - API: None
-        
-        8. Web App Security (`websec-scanner`)
-          - Scans web applications for vulnerabilities like XSS, SQLi, etc.
-          - Tools: SecurityTrails, OWASP ZAP
-          - API: SecurityTrails API
-        
-        9. Network Scanner (`network-scanner`)
-          - Performs network reconnaissance, port scanning, and service enumeration.
-          - Tools: Nmap, Masscan
-          - API: None
-        
-        10. Exploit Finder (`exploit-finder`)
-            - Searches for public exploits related to CVE IDs and software versions.
-            - Tools: Exploit-DB
-            - API: Exploit-DB API
-        
-        API Setup:
-        Use the following command to set an API key for a module:
-        ```
-        set-api <SERVICE> <API_KEY>
-        ```
-        Example:
-        ```
-        set-api VIRUSTOTAL abc123xyz
-        ```
-        """ + f"""
+    Available Modules & Descriptions:{RESET}
+
+    {BOLD}Module{RESET}                {BOLD}Description{RESET}
+    ─────────────────────────────────────────────────────────────────────
+    {BOLD}Incident Response{RESET}     Parses logs, analyzes system events, and runs automated response playbooks.
+                       Tools: LogParser, Volatility
+                       API: None
+
+    {BOLD}SIEM Analysis{RESET}         Correlates logs from multiple sources and applies Sigma rules for threat detection.
+                       Tools: Elasticsearch, Sigma
+                       API: ElasticSearch API
+
+    {BOLD}Threat Intelligence{RESET}   Queries threat databases for malicious indicators (IPs, domains, files).
+                       Tools: VirusTotal, AbuseIPDB
+                       API: VirusTotal API, AbuseIPDB API
+
+    {BOLD}YARA Scan{RESET}             Scans files and memory for malware using YARA rules.
+                       Tools: YARA, HybridAnalysis
+                       API: HybridAnalysis API
+
+    {BOLD}Malware Analysis{RESET}      Performs static and dynamic malware analysis.
+                       Tools: ANY.RUN, HybridAnalysis
+                       API: ANY.RUN API, HybridAnalysis API
+
+    {BOLD}OSINT Recon{RESET}           Collects open-source intelligence on domains, emails, and infrastructure.
+                       Tools: Shodan, Hunter.io
+                       API: Shodan API, Hunter.io API
+
+    {BOLD}Forensic Analysis{RESET}     Extracts forensic artifacts from disk images, memory dumps, and logs.
+                       Tools: Autopsy, Volatility
+                       API: None
+
+    {BOLD}Web App Security{RESET}      Scans web applications for vulnerabilities like XSS, SQLi, etc.
+                       Tools: SecurityTrails, OWASP ZAP
+                       API: SecurityTrails API
+
+    {BOLD}Network Scanner{RESET}       Performs network reconnaissance, port scanning, and service enumeration.
+                       Tools: Nmap, Masscan
+                       API: None
+
+    {BOLD}Exploit Finder{RESET}        Searches for public exploits related to CVE IDs and software versions.
+                       Tools: Exploit-DB
+                       API: None
+
+    {BOLD}{YELLOW}────────────────────────────────────────────────────────────────────{RESET}
+    {BOLD}API list:{RESET}
+    ─────────────────────────────────────────────────────────────────────
+    {BOLD}Module{RESET}                     {BOLD}Required API{RESET}
+    ─────────────────────────────────────────────────────────────────────
+    SIEM Analysis                      ElasticSearch API
+    Threat Intelligence                VirusTotal API, AbuseIPDB API
+    YARA Scan                          HybridAnalysis API
+    Malware Analysis                   ANY.RUN API, HybridAnalysis API
+    OSINT Recon                        Shodan API, Hunter.io API
+    Web App Security                   SecurityTrails API
 
     {BOLD}{YELLOW}────────────────────────────────────────────────────────────────────{RESET}
     {BOLD}Additional Information:{RESET}

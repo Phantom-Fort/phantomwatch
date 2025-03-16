@@ -1,3 +1,26 @@
+import random
+import pyfiglet
+import socket
+
+def is_connected():
+    """Check if the system has an active internet connection."""
+    try:
+        socket.create_connection(("8.8.8.8", 53), timeout=2)
+        return True
+    except OSError:
+        return False
+
+font_list = {"slant", "sub-zero", "block", "bubble", "digital", "ivrit", "lean", "mini", "script", "shadow", "speed", "standard", "term", "3D-ASCII"}
+
+def generate_ascii_art(text, width=80):
+    """Generate ASCII art for the given text using pyfiglet."""
+    font = random.choice(list(font_list))
+    try:
+        ascii_art = pyfiglet.figlet_format(text, font=font, width=width)
+        return ascii_art
+    except Exception:
+        return None
+
 def display_banner():
     # ANSI Escape Codes for Colors
     CYAN = "\033[96m"
@@ -6,9 +29,15 @@ def display_banner():
     BOLD = "\033[1m"
     RESET = "\033[0m"
 
-    banner = rf"""{RED}{BOLD}
+    if is_connected():
+        # Generate ASCII Art Dynamically
+        ascii_text = generate_ascii_art("PHANTOMWATCH")
+        banner = f"{RED}{BOLD}\n{'-' * 80}\n{CYAN}{ascii_text}{YELLOW}\n[ PHANTOMWATCH ] - Cyber Threat Automation\n{RESET}{'-' * 80}"
+    else:
+        # Default ASCII Banners (No Internet)
+        default_banners = [
+            rf"""{RED}{BOLD}
 ─────────────────────────────────────────────────────────────────────
-
                           {CYAN}.-'      `-.  
                          /            \  
                         |              |  
@@ -23,9 +52,31 @@ def display_banner():
 
                         {YELLOW}☠️  PHANTOMWATCH ☠️  
                 Automating SOC & Threat Intelligence{RESET}
-
 ─────────────────────────────────────────────────────────────────────
-    """
+            """,
+            rf"""
+>>=================================================================================<<
+|| ________  ___  ___  ________  ________   _________  ________  _____ ______      ||
+|||\   __  \|\  \|\  \|\   __  \|\   ___  \|\___   ___\\   __  \|\   _ \  _   \    ||
+||\ \  \|\  \ \  \\\  \ \  \|\  \ \  \\ \  \|___ \  \_\ \  \|\  \ \  \\\__\ \  \   ||
+|| \ \   ____\ \   __  \ \   __  \ \  \\ \  \   \ \  \ \ \  \\\  \ \  \\|__| \  \  ||
+||  \ \  \___|\ \  \ \  \ \  \ \  \ \  \\ \  \   \ \  \ \ \  \\\  \ \  \    \ \  \ ||
+||   \ \__\    \ \__\ \__\ \__\ \__\ \__\\ \__\   \ \__\ \ \_______\ \__\    \ \__\||
+|| ___\|__|  __ \|________\|_________|_________  ___|____ \|_______|\|__|     \|__|||
+|||\  \     |\  \|\   __  \|\___   ___\\   ____\|\  \|\  \                         ||
+||\ \  \    \ \  \ \  \|\  \|___ \  \_\ \  \___|\ \  \\\  \                        ||
+|| \ \  \  __\ \  \ \   __  \   \ \  \ \ \  \    \ \   __  \                       ||
+||  \ \  \|\__\_\  \ \  \ \  \   \ \  \ \ \  \____\ \  \ \  \                      ||
+||   \ \____________\ \__\ \__\   \ \__\ \ \_______\ \__\ \__\                     ||
+||    \|____________|\|__|\|__|    \|__|  \|_______|\|__|\|__|                     ||
+||                                                                                 ||
+||                                                                                 ||
+||                 {YELLOW}PHANTOMWATCH - Ultimate SOC Automation Tool{RESET}      ||
+>>=================================================================================<<
+            """
+        ]
+        banner = random.choice(default_banners)
+
     print(banner)
 
 if __name__ == "__main__":
