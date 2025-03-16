@@ -87,8 +87,7 @@ def save_results(results, output_file):
     except Exception as e:
         log_event(f"Failed to save results: {e}", "error")
 
-
-if __name__ == "__main__":
+def run():
     scan_results = scan_file_with_yara(SAMPLE_FILE)
     if scan_results:
         save_results(scan_results, SCAN_OUTPUT_FILE)
@@ -100,3 +99,6 @@ if __name__ == "__main__":
             save_results(intel_data, "output/hybrid_analysis_results.json")
     else:
         log_event("No YARA matches found.")
+
+if __name__ == "__main__":
+    run()

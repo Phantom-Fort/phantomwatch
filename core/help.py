@@ -38,8 +38,9 @@ def display_help():
       {BOLD}run{RESET}                            → Run the currently selected module
       {BOLD}run <module name>{RESET}              → Run a specific module
       {BOLD}phantomwatch -m <module>{RESET}       → Run a module using the CLI
-      {BOLD}view-api{RESET}                       → View configured API keys
-      
+      {BOLD}view-api{RESET}                       → View all API keys
+      {BOLD}back{RESET}                           → Go back
+        
 
     {GREEN}Configuration:{RESET}
       {BOLD}set-api <SERVICE> <API_KEY>{RESET}    → Set API key for a specific service

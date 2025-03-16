@@ -104,7 +104,8 @@ def execute_module(module):
     required_api_key = getattr(MODULES[module], "REQUIRED_API_KEY", None)
 
     if required_api_key:
-        api_keys = dotenv_values(os.path.join(os.path.dirname(__file__), "../.env"))
+        env_path = os.path.join(os.path.dirname(__file__), "../.env")
+        api_keys = dotenv_values(env_path)
 
         if required_api_key not in api_keys or not api_keys[required_api_key].strip():
             OutputFormatter.print_message(f"[-] Error: The module '{module}' requires the API key '{required_api_key}' to be set.", "error")
@@ -113,15 +114,27 @@ def execute_module(module):
             if set_key == "y":
                 new_api_key = input(f"Enter the API key for '{required_api_key}': ").strip()
                 if new_api_key:
-                    with open(os.path.join(os.path.dirname(__file__), "../.env"), "a") as env_file:
-                        env_file.write(f"\n{required_api_key}={new_api_key}")
+                    with open(env_path, "a") as env_file:
+                        env_file.write(f"\n{required_api_key}={new_api_key}\n")
+
                     OutputFormatter.print_message(f"[+] API key for '{required_api_key}' has been set.", "success")
+
+                    # Reload the API keys after updating the .env file
+                    api_keys = dotenv_values(env_path)
                 else:
                     OutputFormatter.print_message("[-] No API key provided. Module execution aborted.", "error")
                     return
             else:
                 OutputFormatter.print_message("[-] API key not set. Module execution aborted.", "error")
                 return
+
+    # Execute the module safely
+    try:
+        MODULES[module].run()  # Assuming modules have a `run()` function
+        OutputFormatter.print_message(f"[+] Module '{module}' executed successfully.", "success")
+    except Exception as e:
+        OutputFormatter.print_message(f"[-] Error executing module '{module}': {str(e)}", "error")
+        logger.error(f"Module execution failed: {module}, Error: {str(e)}")
 
     # Collect user inputs
     user_inputs = get_user_inputs(module)
@@ -130,7 +143,7 @@ def execute_module(module):
 
     try:
         # Pass user inputs as arguments to the module's run() function
-        MODULES[module].run(**user_inputs)
+        MODULES[module].main(**user_inputs)
         logger.success(f"Successfully executed module: {module}")
     except AttributeError:
         OutputFormatter.print_message("[-] Error: Selected module does not have a 'run' function.", "error")

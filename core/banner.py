@@ -12,7 +12,7 @@ def is_connected():
 
 font_list = {"slant", "sub-zero", "bubble", "digital", "ivrit", "lean", "script", "shadow", "speed", "standard", "term", "3D-ASCII"}
 
-def generate_ascii_art(text, width=80):
+def generate_ascii_art(text, width=85):
     """Generate ASCII art for the given text using pyfiglet."""
     font = random.choice(list(font_list))
     try:
@@ -32,28 +32,10 @@ def display_banner():
     if is_connected():
         # Generate ASCII Art Dynamically
         ascii_text = generate_ascii_art("PHANTOMWATCH")
-        banner = f"{RED}{BOLD}\n{'-' * 80}\n{CYAN}{ascii_text}{YELLOW}\n[ PHANTOMWATCH ] - Cyber Threat Automation\n{RESET}{'-' * 80}"
+        banner = f"{RED}{BOLD}\n{'-' * 80}\n{CYAN}{ascii_text}{CYAN}\n[ PHANTOMWATCH ] - Ultimate SOC Automation Tool\n{RESET}{'-' * 80}"
     else:
         # Default ASCII Banners (No Internet)
         default_banners = [
-            rf"""{RED}{BOLD}
-─────────────────────────────────────────────────────────────────────
-                          {CYAN}.-'      `-.  
-                         /            \  
-                        |              |  
-                        |,  .-.  .-.  ,|  
-                        | )(_o/  \o_)( |  
-                        |/     /\     \|  
-                        (_     ^^     _)  
-                         \__|IIIIII|__/  
-                          | \IIIIII/ |  
-                           \        /  
-                            `------`  
-
-                        {YELLOW}☠️  PHANTOMWATCH ☠️  
-                Automating SOC & Threat Intelligence{RESET}
-─────────────────────────────────────────────────────────────────────
-            """,
             rf"""
 >>=================================================================================<<
 || ________  ___  ___  ________  ________   _________  ________  _____ ______      ||
@@ -71,7 +53,7 @@ def display_banner():
 ||    \|____________|\|__|\|__|    \|__|  \|_______|\|__|\|__|                     ||
 ||                                                                                 ||
 ||                                                                                 ||
-||                 {YELLOW}PHANTOMWATCH - Ultimate SOC Automation Tool{RESET}      ||
+||                 {RED}PHANTOMWATCH - Ultimate SOC Automation Tool{RESET}      ||
 >>=================================================================================<<
             """
         ]

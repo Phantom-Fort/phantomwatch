@@ -71,6 +71,9 @@ def osint_recon(target):
     log_event(f"OSINT Recon completed. Results saved to output/osint_{target}.json")
     return results
 
-if __name__ == "__main__":
+def run():
     target = input("Enter target domain or IP: ")
     osint_recon(target)
+
+if __name__ == "__main__":
+    run()

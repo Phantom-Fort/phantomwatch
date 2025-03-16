@@ -78,10 +78,13 @@ def save_results(results, output_file):
     except Exception as e:
         log_event(f"Failed to save results: {e}", "error")
 
-
-if __name__ == "__main__":
+def run():
+    """Executes the forensic analysis on disk image and memory dump."""
     forensic_results = analyze_disk(DISK_IMAGE) + analyze_memory(MEMORY_DUMP)
     if forensic_results:
         save_results(forensic_results, ANALYSIS_OUTPUT)
     else:
         log_event("No forensic artifacts found.")
+
+if __name__ == "__main__":
+    run()

@@ -128,5 +128,8 @@ def analyze_siem_logs():
     except Exception as e:
         log_event(f"[ERROR] {str(e)}")
 
-if __name__ == "__main__":
+def run():
     analyze_siem_logs()
+
+if __name__ == "__main__":
+    run()

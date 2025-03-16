@@ -50,7 +50,11 @@ def scan_network(target):
     else:
         return {"message": "No open ports found."}
 
+def run(target_ip):
+    results = scan_network(target_ip)
+    return results
+
 if __name__ == "__main__":
     target_ip = "192.168.1.1"  # Change to target
-    results = scan_network(target_ip)
+    results = run(target_ip)
     print(json.dumps(results, indent=4))

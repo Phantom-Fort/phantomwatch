@@ -65,9 +65,12 @@ def save_output(results, filename):
     except Exception as e:
         log_event(f"[ERROR] Failed to save output: {e}")
 
-if __name__ == "__main__":
+def run():
     ioc_type = "ip"
     value = "1.1.1.1"
     
     results = fetch_threat_intel(ioc_type, value)
     save_output(results, CONFIG["THREAT_INTEL_REPORT"])
+
+if __name__ == "__main__":
+    run()
