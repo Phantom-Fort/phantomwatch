@@ -6,10 +6,9 @@ import sys
 import yaml
 from elasticsearch import Elasticsearch
 from sigma.parser.collection import SigmaCollectionParser
-from sigma.backends.elasticsearch import ElasticsearchQuerystringBackend
-from sigma.pipelines.elasticsearch import ElasticsearchPipeline
-pipeline = ElasticsearchPipeline()
-
+from sigma.backends.elasticsearch import LuceneBackend
+from sigma.rule import SigmaRule
+from sigma.pipelines.elasticsearch import ecs_windows
 from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -34,9 +33,8 @@ def load_sigma_rules(rule_file):
         return []
     try:
         with open(rule_file, "r") as f:
-            parser = SigmaCollectionParser(f.read())
-            backend = ElasticsearchQuerystringBackend(pipeline)
-
+            parser = SigmaCollectionParser(f.read(), SigmaRule())
+            backend = LuceneBackend(SigmaRule())
             return [backend.convert(rule) for rule in parser.rules]
     except yaml.YAMLError as e:
         log_event(f"[ERROR] Error parsing Sigma rules YAML: {e}")
@@ -47,7 +45,7 @@ def search_logs_with_sigma():
     sigma_queries = load_sigma_rules(SIGMA_RULES_FILE)
     alerts = []
     for query in sigma_queries:
-        response = es.search(index=INDEX_NAME, body={"query": {"query_string": {"query": query}}})
+        response = es.search(index=INDEX_NAME, query={"query_string": {"query": query}})
         if response["hits"]["total"]["value"] > 0:
             alerts.extend(response["hits"]["hits"])
     
@@ -98,13 +96,23 @@ def correlate_events():
     
     # Store only the last successful correlation results
     store_siem_results('correlation_results', correlation_results)
-
+    
     # Output results to a file
     with open("correlation_results.json", "w") as f:
         json.dump(correlation_results, f, indent=2)
     
     log_event(f"[INFO] Correlated {len(correlation_results)} events.")
     return correlation_results
+
+# Retrieve results by command
+def get_saved_results(table_name):
+    conn = sqlite3.connect(CONFIG["DATABASE_PATH"])
+    cursor = conn.cursor()
+    query = f"SELECT * FROM {table_name} ORDER BY timestamp DESC LIMIT 1"
+    cursor.execute(query)
+    results = cursor.fetchall()
+    conn.close()
+    return results
 
 # Main execution function
 def analyze_siem_logs():

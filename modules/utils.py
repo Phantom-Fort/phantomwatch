@@ -140,6 +140,30 @@ def init_db():
 
         "sigma_rules": '''CREATE TABLE IF NOT EXISTS sigma_rules (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)''',
+
+        "exploit_finder": '''CREATE TABLE IF NOT EXISTS sigma_rules (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)''',
+
+        "forensic_analysis": '''CREATE TABLE IF NOT EXISTS sigma_rules (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)''',
+
+        "malware_analysis": '''CREATE TABLE IF NOT EXISTS sigma_rules (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)''',
+
+        "network_scanner": '''CREATE TABLE IF NOT EXISTS sigma_rules (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)''',
+
+        "osint_recon": '''CREATE TABLE IF NOT EXISTS sigma_rules (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)''',
+
+        "websec_scanner": '''CREATE TABLE IF NOT EXISTS sigma_rules (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
                         log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)'''
     }
 
