@@ -12,7 +12,7 @@ from sigma.pipelines.elasticsearch import ecs_windows
 from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from utils import log_event, init_db, store_siem_results, store_sigma_match
+from .utils import log_event, init_db, store_siem_results, store_sigma_match
 from config.config import CONFIG
 
 # Initialize Database

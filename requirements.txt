@@ -1,6 +1,7 @@
 # CLI-related dependencies
 click
 rich
+argparse
 
 # Environment & Configuration Management
 python-dotenv
@@ -17,6 +18,7 @@ pySigma-backend-elasticsearch
 sigmatools
 elasticsearch
 pyyaml
+shodan
 
 # Utility and Performance
 tqdm
