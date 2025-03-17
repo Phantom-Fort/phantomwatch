@@ -2,6 +2,7 @@ import subprocess
 import json
 import re
 from datetime import datetime
+from .utils import store_result, log_event, save_output
 
 def run_masscan(target, ports="1-65535", rate="10000"):
     """Runs Masscan for fast port scanning."""
@@ -11,6 +12,7 @@ def run_masscan(target, ports="1-65535", rate="10000"):
         ], capture_output=True, text=True, check=True)
         return json.loads(result.stdout) if result.stdout else []
     except Exception as e:
+        log_event(f"Masscan error: {str(e)}", "error")
         return {"error": str(e)}
 
 def run_nmap(target, ports):
@@ -21,6 +23,7 @@ def run_nmap(target, ports):
         ], capture_output=True, text=True, check=True)
         return parse_nmap_output(result.stdout)
     except Exception as e:
+        log_event(f"Nmap error: {str(e)}", "error")
         return {"error": str(e)}
 
 def parse_nmap_output(nmap_output):
@@ -53,6 +56,9 @@ def scan_network(target):
 def run():
     target_ip = "192.168.1.1/24"  # Change to target
     results = scan_network(target_ip)
+    log_event(f"Scan results for {target_ip}: {json.dumps(results, indent=4)}")
+    store_result(results)
+    save_output("network_scan_results.json", results)
     print(json.dumps(results, indent=4))
 
 if __name__ == "__main__":

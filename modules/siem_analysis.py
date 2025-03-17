@@ -12,7 +12,7 @@ from sigma.pipelines.elasticsearch import ecs_windows
 from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from .utils import log_event, init_db, store_siem_results, store_sigma_match
+from .utils import log_event, init_db, store_siem_results, store_sigma_match, save_output
 from config.config import CONFIG
 
 # Initialize Database
@@ -29,7 +29,7 @@ es = Elasticsearch([ELASTICSEARCH_HOST])
 # Load Sigma rules
 def load_sigma_rules(rule_file):
     if not os.path.exists(rule_file):
-        log_event(f"[ERROR] Sigma rule file not found: {rule_file}")
+        log_event(f"[ERROR] Sigma rule file not found: {rule_file}", "error")
         return []
     try:
         with open(rule_file, "r") as f:
@@ -37,7 +37,7 @@ def load_sigma_rules(rule_file):
             backend = LuceneBackend(SigmaRule())
             return [backend.convert(rule) for rule in parser.rules]
     except yaml.YAMLError as e:
-        log_event(f"[ERROR] Error parsing Sigma rules YAML: {e}")
+        log_event(f"[ERROR] Error parsing Sigma rules YAML: {e}", "error")
         return []
 
 # Search logs in Elasticsearch using Sigma rules
@@ -53,8 +53,7 @@ def search_logs_with_sigma():
     store_siem_results('siem_alerts', alerts)
     
     # Output results to a file
-    with open("siem_alerts.json", "w") as f:
-        json.dump(alerts, f, indent=2)
+    save_output("siem_alerts.json", alerts)
     
     return alerts
 
@@ -98,21 +97,10 @@ def correlate_events():
     store_siem_results('correlation_results', correlation_results)
     
     # Output results to a file
-    with open("correlation_results.json", "w") as f:
-        json.dump(correlation_results, f, indent=2)
+    save_output("correlation_results.json", correlation_results)
     
-    log_event(f"[INFO] Correlated {len(correlation_results)} events.")
+    log_event(f"[INFO] Correlated {len(correlation_results)} events.", "info")
     return correlation_results
-
-# Retrieve results by command
-def get_saved_results(table_name):
-    conn = sqlite3.connect(CONFIG["DATABASE_PATH"])
-    cursor = conn.cursor()
-    query = f"SELECT * FROM {table_name} ORDER BY timestamp DESC LIMIT 1"
-    cursor.execute(query)
-    results = cursor.fetchall()
-    conn.close()
-    return results
 
 # Main execution function
 def analyze_siem_logs():
@@ -126,7 +114,7 @@ def analyze_siem_logs():
         else:
             print("[INFO] No threats detected in logs.")
     except Exception as e:
-        log_event(f"[ERROR] {str(e)}")
+        log_event(f"[ERROR] Log analysis failed {str(e)}", "error")
 
 def run():
     analyze_siem_logs()

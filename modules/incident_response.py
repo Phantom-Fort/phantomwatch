@@ -1,15 +1,15 @@
 import json
 import requests
+import psutil
 import os
 import sys
 import subprocess
 import shutil
-import psutil
 import sqlite3
 from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from .utils import get_api_key, log_event, init_db, store_result, log_incident, fetch_threat_intel, save_output
+from .utils import log_event, init_db, store_result, log_incident, fetch_threat_intel, save_output
 from config.config import CONFIG  # Import config
 
 # Database setup
@@ -70,7 +70,7 @@ def run():
     value = "1.1.1.1"
     results = fetch_threat_intel(ioc_type, value)
     save_output(results, "report.json")
-    log_event("[*] Threat intelligence report saved.")
+    log_event("[*] Threat intelligence report saved.", "info")
     track_incident("IR001", "Threat Intelligence Fetch", "Completed")
 
 def run_forensic_analysis():

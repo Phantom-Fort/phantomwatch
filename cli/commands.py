@@ -7,7 +7,7 @@ from config.config import CONFIG
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from core.output_formatter import OutputFormatter
-from modules.utils import log_event
+from modules.utils import log_event, get_saved_results
 from core.help import display_help
 from modules import (
     incident_response, 
@@ -159,7 +159,7 @@ def list_modules():
 
 # List of commands for auto-completion
 
-COMMANDS = ["help", "back", "list-modules", "view-api", "use", "run", "set-api", "clear", "exit", "quit", "run {module}", "set-api {service} {api_key}", "use {module}"]
+COMMANDS = ["help", "back", "list-modules", "view-api", "use", "run", "set-api", "logs", "reports" "clear", "exit", "quit", "run {module}", "set-api {service} {api_key}", "use {module}"]
 
 
 def completer(text, state):
@@ -205,6 +205,39 @@ def interactive_shell():
 
             elif cmd.lower() == "clear":
                 os.system("clear")
+            
+            elif cmd.lower() == "logs":
+                os.system("less logs/phantomwatch.log")
+
+            elif cmd.lower() == "reports":
+                # List available tables
+                tables = get_saved_results("tables")
+                if not tables:
+                    OutputFormatter.print_message("[-] No tables found.", "warning")
+                    continue
+
+                print("[INFO] Available tables:")
+                for i, table in enumerate(tables, start=1):
+                    print(f"  {i}. {table}")
+
+                table_choice = input("Enter the number corresponding to the table you want to view: ").strip()
+                try:
+                    table_choice = int(table_choice)
+                    if 1 <= table_choice <= len(tables):
+                        selected_table = tables[table_choice - 1]
+                    else:
+                        OutputFormatter.print_message(f"[-] Error: Invalid choice '{table_choice}'.", "error")
+                        continue
+                except ValueError:
+                    OutputFormatter.print_message(f"[-] Error: Please enter a valid number.", "error")
+                    continue
+
+                # Fetch and display results from the selected table
+                results = get_saved_results(selected_table)
+                if results:
+                    print(f"[+] Latest result from '{selected_table}': {results[0]}")
+                else:
+                    OutputFormatter.print_message(f"[-] No results found in '{selected_table}'.", "warning")
 
             elif cmd.lower().startswith("use "):
                 module = cmd.split(" ", 1)[1]

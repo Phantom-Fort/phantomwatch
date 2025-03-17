@@ -7,7 +7,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config.config import CONFIG
-from .utils import log_event, init_db, store_result
+from .utils import log_event, init_db, store_result, save_output
 
 # Initialize database
 init_db()
@@ -78,25 +78,16 @@ def fetch_hybrid_analysis(file_hash):
         return None
 
 
-def save_results(results, output_file):
-    """Save scan results to a JSON file."""
-    try:
-        with open(output_file, "w") as f:
-            json.dump(results, f, indent=4)
-        log_event(f"Results saved to {output_file}")
-    except Exception as e:
-        log_event(f"Failed to save results: {e}", "error")
-
 def run():
     scan_results = scan_file_with_yara(SAMPLE_FILE)
     if scan_results:
-        save_results(scan_results, SCAN_OUTPUT_FILE)
+        save_output(scan_results, SCAN_OUTPUT_FILE)
         
         # Fetch threat intelligence from HybridAnalysis
         file_hash = "some_calculated_hash"  # Replace with actual file hash calculation
         intel_data = fetch_hybrid_analysis(file_hash)
         if intel_data:
-            save_results(intel_data, "output/hybrid_analysis_results.json")
+            save_output(intel_data, "results/hybrid_analysis_results.json")
     else:
         log_event("No YARA matches found.")
 

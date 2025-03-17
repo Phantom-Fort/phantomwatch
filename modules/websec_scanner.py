@@ -6,7 +6,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config.config import CONFIG
-from .utils import log_event, save_output
+from .utils import log_event, save_output, store_result
 
 def is_wordpress(url):
     """Check if a website is running WordPress."""
@@ -71,6 +71,7 @@ def websec_scan(target):
     final_results = {"reconnaissance": recon_data, "scan_results": scan_results}
     save_output(final_results, "output/websec_scan.json")
     log_event("Web security scan completed.")
+    store_result("websec_scanner", "Web security scan completed.", "websec_scan", "High")
     
     return final_results
 

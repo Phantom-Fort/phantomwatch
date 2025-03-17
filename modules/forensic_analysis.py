@@ -6,7 +6,7 @@ from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config.config import CONFIG
-from .utils import log_event, init_db, store_result
+from .utils import log_event, init_db, store_result, save_output
 
 # Initialize database
 init_db()
@@ -69,20 +69,12 @@ def analyze_memory(memory_path):
         return []
 
 
-def save_results(results, output_file):
-    """Save forensic analysis results to a JSON file."""
-    try:
-        with open(output_file, "w") as f:
-            json.dump(results, f, indent=4)
-        log_event(f"Results saved to {output_file}")
-    except Exception as e:
-        log_event(f"Failed to save results: {e}", "error")
-
 def run():
     """Executes the forensic analysis on disk image and memory dump."""
     forensic_results = analyze_disk(DISK_IMAGE) + analyze_memory(MEMORY_DUMP)
     if forensic_results:
-        save_results(forensic_results, ANALYSIS_OUTPUT)
+        save_output(forensic_results, ANALYSIS_OUTPUT)
+        store_result("forensic_analysis", ANALYSIS_OUTPUT, "Forensic artifacts extracted")
     else:
         log_event("No forensic artifacts found.", "warning")
 

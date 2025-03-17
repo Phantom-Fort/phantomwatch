@@ -7,7 +7,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config.config import CONFIG
-from .utils import log_event, store_result
+from .utils import log_event, store_result, save_output
 
 def shodan_scan(target):
     api_key = CONFIG.get("SHODAN_API_KEY")
@@ -65,10 +65,10 @@ def osint_recon(target):
         "wiggle": wiggle_data,
     }
     
-    with open(f"output/osint_{target}.json", "w") as f:
-        json.dump(results, f, indent=4)
+    save_output(f"osint_{target}.json", results)
     
     log_event(f"OSINT Recon completed. Results saved to output/osint_{target}.json")
+    store_result ("osint_recon", target, "osint_recon")
     return results
 
 def run():

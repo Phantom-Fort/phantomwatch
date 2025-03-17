@@ -31,7 +31,10 @@ def display_help():
     {GREEN}General Commands:{RESET}
       {BOLD}help{RESET}                           → Display this help page
       {BOLD}exit, quit{RESET}                     → Exit PhantomWatch interactive shell
-
+      {BOLD}reports{RESET}                        → To view past results/reports
+      {BOLD}logs{RESET}                           → To view past logs
+      {BOLD}clear{RESET}                          → Clear the screen
+      
     {GREEN}Module Management:{RESET}
       {BOLD}list-modules{RESET}                   → List all available modules
       {BOLD}use <module name>{RESET}              → Select a module (changes prompt)
@@ -39,7 +42,8 @@ def display_help():
       {BOLD}run <module name>{RESET}              → Run a specific module
       {BOLD}phantomwatch -m <module>{RESET}       → Run a module using the CLI
       {BOLD}view-api{RESET}                       → View all API keys
-      {BOLD}back{RESET}                           → Go back
+      {BOLD}back{RESET}                           → Go back to the main menu
+
         
 
     {GREEN}Configuration:{RESET}
@@ -97,7 +101,7 @@ def display_help():
     {BOLD}Module{RESET}                     {BOLD}Required API{RESET}
     ─────────────────────────────────────────────────────────────────────
     SIEM Analysis                      ElasticSearch API
-    Threat Intelligence                VirusTotal API, AbuseIPDB API, MISP API, OTX API
+    Threat Intelligence                VirusTotal API, MISP API, OTX API
     YARA Scan                          HybridAnalysis API
     Malware Analysis                   ANY.RUN API, HybridAnalysis API
     OSINT Recon                        Shodan API, Hunter.io API

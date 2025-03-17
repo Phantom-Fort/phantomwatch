@@ -171,17 +171,17 @@ def init_db():
     conn.close()
     log_event("Database initialized successfully.")
 
-def store_result(table, file, rule_name, severity="Medium"):
+def store_result(table, log, rule_name, severity="Medium"):
     """Store scan results in the database."""
     conn = sqlite3.connect(CONFIG["DATABASE_PATH"])
     cursor = conn.cursor()
     cursor.execute(
-        f"INSERT INTO {table} (file, rule_name, severity, timestamp) VALUES (?, ?, ?, datetime('now'))",
-        (file, rule_name, severity)
+        f"INSERT INTO {table} (log, rule_name, severity, timestamp) VALUES (?, ?, ?, datetime('now'))",
+        (log, rule_name, severity)
     )
     conn.commit()
     conn.close()
-    log_event(f"[*] Stored result in {table}: {rule_name} -> {file} (Severity: {severity})")
+    log_event(f"[*] Stored result in {table}: {rule_name} -> {log} (Severity: {severity})")
 
 def store_siem_results(table_name, data):
     conn = sqlite3.connect(CONFIG["DATABASE_PATH"])

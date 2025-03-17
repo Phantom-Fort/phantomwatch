@@ -10,6 +10,7 @@ logs/
 venv/
 env/
 *.env
+config/*.env
 
 # System-specific files
 .DS_Store

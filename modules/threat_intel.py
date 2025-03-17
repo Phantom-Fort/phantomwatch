@@ -6,7 +6,7 @@ from datetime import datetime
 from OTXv2 import OTXv2, IndicatorTypes
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from .utils import get_api_key, log_event, init_db, store_result
+from .utils import get_api_key, log_event, init_db, store_result, save_output
 from config.config import CONFIG  # Import config file
 
 # Database setup
@@ -64,15 +64,6 @@ def fetch_threat_intel(ioc_type, value):
                 log_event(f"[ERROR] OTX API query failed: {e}")
 
         return results
-
-
-def save_output(results, filename):
-    try:
-        with open(filename, "w") as f:
-            json.dump(results, f, indent=4)
-        log_event(f"[INFO] Output saved to {filename}")
-    except Exception as e:
-        log_event(f"[ERROR] Failed to save output: {e}")
 
 def run():
     ioc_type = "ip", "domain", "hash"
