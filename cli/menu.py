@@ -25,9 +25,9 @@ except (FileNotFoundError, json.JSONDecodeError) as e:
     exit(1)
 
 
-def main():
+def menu():
     """Main entry point for PhantomWatch CLI."""
     interactive_shell()
 
 if __name__ == "__main__":
-    main()
+    menu()

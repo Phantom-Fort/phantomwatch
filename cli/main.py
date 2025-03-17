@@ -9,7 +9,7 @@ from core.banner import display_banner
 from core.soc_tips import get_random_tips
 from core.output_formatter import OutputFormatter
 from dotenv import load_dotenv
-from menu import interactive_shell
+from menu import menu
 
 # Load environment variables
 load_dotenv()
@@ -64,7 +64,7 @@ def initialize_phantomwatch():
 def main():
     """Entry point for PhantomWatch CLI."""
     initialize_phantomwatch()
-    interactive_shell()
+    menu()
 
 if __name__ == "__main__":
     main()
