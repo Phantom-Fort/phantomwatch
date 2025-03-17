@@ -77,12 +77,74 @@ Example `config.json`:
 }
 ```
 
-Example `.env`:
+Example `secrets.env`:
 
 ```ini
 API_KEY=your_api_key_here
 SECRET_KEY=your_secret_key_here
 ```
+
+## Modules
+
+### Incident Response
+Parses logs, analyzes system events, and runs automated response playbooks.
+- **Tools**: LogParser, Volatility
+- **API**: None
+
+### SIEM Analysis
+Correlates logs from multiple sources and applies Sigma rules for threat detection.
+- **Tools**: Elasticsearch, Sigma
+- **API**: ElasticSearch API
+
+### Threat Intelligence
+Queries threat databases for malicious indicators (IPs, domains, files).
+- **Tools**: VirusTotal, AbuseIPDB
+- **API**: VirusTotal API, AbuseIPDB API
+
+### YARA Scan
+Scans files and memory for malware using YARA rules.
+- **Tools**: YARA, HybridAnalysis
+- **API**: HybridAnalysis API
+
+### Malware Analysis
+Performs static and dynamic malware analysis.
+- **Tools**: ANY.RUN, HybridAnalysis
+- **API**: ANY.RUN API, HybridAnalysis API
+
+### OSINT Recon
+Collects open-source intelligence on domains, emails, and infrastructure.
+- **Tools**: Shodan, Hunter.io
+- **API**: Shodan API, Hunter.io API
+
+### Forensic Analysis
+Extracts forensic artifacts from disk images, memory dumps, and logs.
+- **Tools**: Autopsy, Volatility
+- **API**: None
+
+### Web App Security
+Scans web applications for vulnerabilities like XSS, SQLi, etc.
+- **Tools**: SecurityTrails, OWASP ZAP
+- **API**: SecurityTrails API
+
+### Network Scanner
+Performs network reconnaissance, port scanning, and service enumeration.
+- **Tools**: Nmap, Masscan
+- **API**: None
+
+### Exploit Finder
+Searches for public exploits related to CVE IDs and software versions.
+- **Tools**: Exploit-DB
+- **API**: None
+
+## API List
+
+### Module
+- **SIEM Analysis**: ElasticSearch API
+- **Threat Intelligence**: VirusTotal API, MISP API, OTX API
+- **YARA Scan**: HybridAnalysis API
+- **Malware Analysis**: ANY.RUN API, HybridAnalysis API
+- **OSINT Recon**: Shodan API, Hunter.io API
+- **Web App Security**: SecurityTrails API
 
 ## Contributing
 
@@ -98,4 +160,3 @@ This project is licensed under the MIT License.
 ## Contact
 
 For issues and inquiries, contact `posiayoola102@gmail.com` or open an issue on GitHub.
-
