@@ -28,11 +28,11 @@ def fetch_threat_intel(ioc_type, value):
                 results["VirusTotal"] = response.json()
                 store_result(ioc_type, value, "VirusTotal", results["VirusTotal"])
             except requests.exceptions.RequestException as e:
-                log_event(f"[ERROR] VirusTotal API request failed: {e}")
+                log_event(f"[ERROR] VirusTotal API request failed: {e}", "error")
 
         # MISP API
         MISP_API_KEY = get_api_key("MISP_API_KEY")
-        MISP_URL = CONFIG.get("MISP_URL")
+        MISP_URL = CONFIG.get("MISP_URL", "")
         if MISP_API_KEY and MISP_URL:
             try:
                 misp_url = f"{MISP_URL}/events/restSearch/json"
