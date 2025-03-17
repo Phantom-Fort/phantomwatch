@@ -5,11 +5,11 @@ __pycache__/
 
 # Logs
 logs/
-*.log
 
 # Virtual environments
 venv/
 env/
+*.env
 
 # System-specific files
 .DS_Store

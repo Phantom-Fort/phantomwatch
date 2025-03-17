@@ -1,10 +1,14 @@
 import os
+import sys
 from datetime import datetime
 import json
 from loguru import logger
 from dotenv import load_dotenv
 import sqlite3
 from config.config import CONFIG
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from cli.commands import set_api_key
 
 # Load environment variables
 load_dotenv("config/secrets.env")
@@ -70,13 +74,6 @@ def save_config(updated_config):
     with open(config_path, "w") as config_file:
         json.dump(updated_config, config_file, indent=4)
     log_event("[*] Configuration updated successfully.")
-
-def set_api_key(service_name, api_key):
-    """Set and save API keys for different services in config.json."""
-    config = load_config()
-    config[f"{service_name.upper()}_API_KEY"] = api_key
-    save_config(config)
-    log_event(f"[*] API key for {service_name} has been updated.")
 
 def get_api_key(service_name):
     """Retrieve API keys securely from environment variables or config.json."""

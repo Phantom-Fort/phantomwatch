@@ -2,8 +2,8 @@ import json
 import os
 import sys
 import readline
-from loguru import logger
-from dotenv import load_dotenv, set_key, dotenv_values
+from dotenv import load_dotenv, dotenv_values, set_key
+from config.config import CONFIG
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from core.output_formatter import OutputFormatter
@@ -95,7 +95,7 @@ def execute_module(module):
     """Executes the specified module after collecting necessary inputs."""
     if module not in MODULES:
         OutputFormatter.print_message("[-] Invalid module specified. Use 'list-modules' to list available modules.", "error")
-        logger.warning(f"Invalid module specified: {module}")
+        log_event(f"Invalid module specified: {module}", "warning")
         return
 
     OutputFormatter.print_message(f"[+] Running module: {module}\n", "info")
@@ -104,7 +104,7 @@ def execute_module(module):
     required_api_key = getattr(MODULES[module], "REQUIRED_API_KEY", None)
 
     if required_api_key:
-        env_path = os.path.join(os.path.dirname(__file__), "../.env")
+        env_path = CONFIG.get("env_path", os.path.join(os.path.dirname(__file__), "..config/secrets.env"))
         api_keys = dotenv_values(env_path)
 
         if required_api_key not in api_keys or not api_keys[required_api_key].strip():
@@ -134,7 +134,7 @@ def execute_module(module):
         OutputFormatter.print_message(f"[+] Module '{module}' executed successfully.", "success")
     except Exception as e:
         OutputFormatter.print_message(f"[-] Error executing module '{module}': {str(e)}", "error")
-        logger.error(f"Module execution failed: {module}, Error: {str(e)}")
+        log_event(f"Module execution failed: {module}, Error: {str(e)}", "error")
 
     # Collect user inputs
     user_inputs = get_user_inputs(module)
@@ -144,10 +144,10 @@ def execute_module(module):
     try:
         # Pass user inputs as arguments to the module's run() function
         MODULES[module].main(**user_inputs)
-        logger.success(f"Successfully executed module: {module}")
+        log_event(f"Successfully executed module: {module}", "success")
     except AttributeError:
         OutputFormatter.print_message("[-] Error: Selected module does not have a 'run' function.", "error")
-        logger.error(f"Module '{module}' is missing a 'run' function.")
+        log_event(f"Module '{module}' is missing a 'run' function.", "error")
 
 def list_modules():
     """Lists available modules."""
@@ -184,7 +184,7 @@ def interactive_shell():
             if not cmd:
                 continue  # Ignore empty commands
 
-            logger.info(f"Command entered: {cmd}")
+            log_event(f"Command entered: {cmd}", "info")
 
             if cmd.lower() in ["exit", "quit"]:
                 OutputFormatter.print_message("[+] Exiting PhantomWatch CLI...", "info")
@@ -240,22 +240,22 @@ def interactive_shell():
             OutputFormatter.print_message("\n[+] Exiting PhantomWatch CLI...", "info")
             break
         except Exception as e:
-            logger.error(f"Error: {e}")
+            log_event(f"Error: {e}", "error")
             OutputFormatter.print_message("[-] An error occurred. Check logs for details.", "error")
 
 
 def set_api_key(service, api_key):
     """Sets an API key in the .env file."""
-    env_path = os.path.join(os.path.dirname(__file__), "../.env")
+    env_path = CONFIG.get("env_path", os.path.join(os.path.dirname(__file__), "..config/secrets.env"))
     
     set_key(env_path, service.upper(), api_key)
     OutputFormatter.print_message(f"[+] API key for {service.upper()} set successfully.", "success")
-    logger.info(f"API key for {service.upper()} updated.")
+    log_event(f"API key for {service.upper()} updated.")
 
 
 def view_api_keys():
     """Lists the configured API keys without revealing sensitive values."""
-    api_keys = dotenv_values(os.path.join(os.path.dirname(__file__), "../.env"))
+    api_keys = dotenv_values(os.path.join(os.path.dirname(__file__), "..config/secrets.env"))
 
     if not api_keys:
         OutputFormatter.print_message("[-] No API keys configured.", "warning")

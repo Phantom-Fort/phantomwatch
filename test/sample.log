@@ -1,0 +1,18 @@
+[2025-03-11 10:05:23] INFO  - User login successful from IP 192.168.1.10
+[2025-03-11 10:06:45] WARNING - Multiple failed login attempts detected from IP 203.0.113.45
+[2025-03-11 10:07:12] ERROR  - Possible brute force attack detected from IP 45.67.89.101
+[2025-03-11 10:08:30] INFO  - Firewall rule updated by admin (IP: 172.16.254.1)
+[2025-03-11 10:10:01] CRITICAL - Unauthorized access attempt from blacklisted IP 198.51.100.23
+[2025-03-11 10:11:50] INFO  - DNS request made to suspicious domain (IP: 156.67.32.8)
+[2025-03-11 10:15:30] WARNING - High volume of traffic from IP 185.220.101.6 (Possible DDoS)
+[2025-03-11 10:18:20] INFO  - VPN connection established from 203.0.113.102
+[2025-03-11 10:20:00] ERROR  - Malware traffic detected originating from IP 178.128.32.55
+[2025-03-11 10:25:45] INFO  - Server 192.168.1.2 is up and running
+[2025-03-11 10:30:30] CRITICAL - Ransomware activity detected from IP 185.244.25.39
+[2025-03-11 10:32:10] INFO  - User logout from IP 172.16.254.5
+[2025-03-11 10:40:05] WARNING - Port scan detected from IP 102.129.180.77
+[2025-03-11 10:45:00] INFO  - Security patch applied successfully on system (IP: 192.168.1.3)
+[2025-03-11 10:50:20] ERROR  - Phishing attempt reported from IP 209.85.220.41
+[2025-03-11 10:55:35] WARNING - Suspicious script execution attempt from IP 193.164.10.200
+[2025-03-11 11:00:00] INFO  - Normal traffic recorded from IP 172.217.12.206
+[2025-03-11 11:05:50] ERROR  - Credential stuffing attempt from IP 37.49.225.35

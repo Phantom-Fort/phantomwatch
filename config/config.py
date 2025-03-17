@@ -3,7 +3,7 @@ import json
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv(os.path.join(os.path.dirname(__file__), "secrets.env"))
+load_dotenv(os.path.join(os.path.dirname(__file__), "config/secrets.env"))
 
 # Load JSON config
 json_config_path = os.path.join(os.path.dirname(__file__), "config.json")
@@ -26,7 +26,7 @@ CONFIG = {
     "FORENSIC REPORT": os.path.join(BASE_DIR, "..", "result", "forensics_report.json"),
     "MALWARE_SAMPLE": os.path.join(BASE_DIR, "..", "samples", "malware.exe"),
     "MALWARE REPORT": os.path.join(BASE_DIR, "..", "result", "malware_analysis.json"),
-    "HYBRIDANALYSIS_API_KEY": os.getenv("THREAT_INTEL_API_KEY", "your_api_key_here"),
+    "HYBRIDANALYSIS_API_KEY": os.getenv("HYBRIDANALYSIS_API_KEY", "your_api_key_here"),
     "ANYRUN_API_KEY": os.getenv("ANYRUN_API_KEY", "your_api_key_here"),
     "SHODAN_API_KEY": os.getenv("SHODAN_API_KEY", "your_api_key_here"),
     "SECURITYTRAILS_API_KEY": os.getenv("SECURITYTRAILS_API_KEY", "your_api_key_here"),

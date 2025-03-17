@@ -35,7 +35,7 @@ def analyze_disk(image_path):
             
             for artifact in artifacts:
                 store_result("forensic_disk", artifact["file"], "Extracted from disk image")
-                log_event(f"[DISK] Extracted: {artifact['file']}")
+                log_event(f"[DISK] Extracted: {artifact['file']}", "info")
             return artifacts
         
     except Exception as e:
@@ -61,7 +61,7 @@ def analyze_memory(memory_path):
             
             for artifact in artifacts:
                 store_result("forensic_memory", artifact["process"], "Detected in memory dump")
-                log_event(f"[MEMORY] Found process: {artifact['process']}")
+                log_event(f"[MEMORY] Found process: {artifact['process']}", "info")
             return artifacts
         
     except Exception as e:
@@ -84,7 +84,7 @@ def run():
     if forensic_results:
         save_results(forensic_results, ANALYSIS_OUTPUT)
     else:
-        log_event("No forensic artifacts found.")
+        log_event("No forensic artifacts found.", "warning")
 
 if __name__ == "__main__":
     run()
