@@ -17,10 +17,11 @@ def fetch_threat_intel(ioc_type, value):
     
     with requests.Session() as session:  # Optimize network calls
         # VirusTotal API
+        VT_API_URL = CONFIG.get("VIRUSTOTAL_API_URL")
         VT_API_KEY = get_api_key("VIRUSTOTAL_API_KEY")
         if VT_API_KEY:
             try:
-                vt_url = f"https://www.virustotal.com/api/v3/{ioc_type}/{value}"
+                vt_url = {VT_API_URL}/{ioc_type}/{value}
                 headers = {"x-apikey": VT_API_KEY}
                 response = session.get(vt_url, headers=headers)
                 response.raise_for_status()
@@ -31,7 +32,7 @@ def fetch_threat_intel(ioc_type, value):
 
         # MISP API
         MISP_API_KEY = get_api_key("MISP_API_KEY")
-        MISP_URL = get_api_key("MISP_URL")
+        MISP_URL = CONFIG.get("MISP_URL")
         if MISP_API_KEY and MISP_URL:
             try:
                 misp_url = f"{MISP_URL}/events/restSearch/json"

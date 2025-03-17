@@ -104,7 +104,7 @@ def execute_module(module):
     required_api_key = getattr(MODULES[module], "REQUIRED_API_KEY", None)
 
     if required_api_key:
-        env_path = CONFIG.get("env_path", os.path.join(os.path.dirname(__file__), "..config/secrets.env"))
+        env_path = CONFIG.get("env_path", os.path.join(os.path.dirname(__file__), "../config/secrets.env"))
         api_keys = dotenv_values(env_path)
 
         if required_api_key not in api_keys or not api_keys[required_api_key].strip():
@@ -276,19 +276,17 @@ def interactive_shell():
             log_event(f"Error: {e}", "error")
             OutputFormatter.print_message("[-] An error occurred. Check logs for details.", "error")
 
-
 def set_api_key(service, api_key):
     """Sets an API key in the .env file."""
-    env_path = CONFIG.get("env_path", os.path.join(os.path.dirname(__file__), "..config/secrets.env"))
+    env_path = CONFIG.get("env_path", os.path.join(os.path.dirname(__file__), "../config/secrets.env"))
     
     set_key(env_path, service.upper(), api_key)
     OutputFormatter.print_message(f"[+] API key for {service.upper()} set successfully.", "success")
     log_event(f"API key for {service.upper()} updated.")
 
-
 def view_api_keys():
     """Lists the configured API keys without revealing sensitive values."""
-    api_keys = dotenv_values(os.path.join(os.path.dirname(__file__), "..config/secrets.env"))
+    api_keys = dotenv_values(os.path.join(os.path.dirname(__file__), "../config/secrets.env"))
 
     if not api_keys:
         OutputFormatter.print_message("[-] No API keys configured.", "warning")

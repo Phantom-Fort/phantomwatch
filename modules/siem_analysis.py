@@ -19,7 +19,7 @@ from config.config import CONFIG
 init_db()
 
 # Elasticsearch Configuration
-ELASTICSEARCH_HOST = "http://localhost:9200"
+ELASTICSEARCH_HOST = CONFIG.get("ELASTICSEARCH_HOST", "http://localhost:9200")
 INDEX_NAME = "logs-*"
 SIGMA_RULES_FILE = CONFIG["SIGMA_RULES_PATH"]
 

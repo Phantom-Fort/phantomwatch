@@ -16,6 +16,11 @@ CONFIG = {
     **json_config,  # Merge JSON config into CONFIG
     "DATABASE_PATH": os.path.abspath(os.path.join(BASE_DIR, "..", "database", "phantomwatch.db")),
     "LOG_FILE": os.path.join(BASE_DIR, "..", "logs", "phantomwatch.log"),
+    "ELASTICSEARCH_HOST": "http://localhost:9200",
+    "MISP_URL": "https://misp.local",
+    "ANYRUN_API_URL": "https://api.any.run/v1/submit",
+    "VIRUSTOTAL_API_URL": "https://www.virustotal.com/api/v3",
+    "HYBRIDANALYSIS_API_URL": "https://www.hybrid-analysis.com/api/v2/search/hash",
     "SIGMA_RULES_PATH": os.path.join(BASE_DIR, "sigma_rules.yml"),
     "LOG_FILE_PATH": os.path.join(BASE_DIR, "..", "logs", "phantomwatch.log"),
     "THREAT_INTEL_REPORT": os.path.join(BASE_DIR, "..", "output", "report.json"),
