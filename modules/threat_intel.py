@@ -3,6 +3,7 @@ import requests
 import os
 import sys
 from datetime import datetime
+from OTXv2 import OTXv2, IndicatorTypes
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from .utils import get_api_key, log_event, init_db, store_result
@@ -46,16 +47,24 @@ def fetch_threat_intel(ioc_type, value):
         OTX_API_KEY = get_api_key("OTX_API_KEY")
         if OTX_API_KEY:
             try:
-                otx_url = f"https://otx.alienvault.com/api/v1/indicators/{ioc_type}/{value}"
-                headers = {"X-OTX-API-KEY": OTX_API_KEY}
-                response = session.get(otx_url, headers=headers)
-                response.raise_for_status()
-                results["OTX"] = response.json()
-                store_result(ioc_type, value, "OTX", results["OTX"])
-            except requests.exceptions.RequestException as e:
-                log_event(f"[ERROR] OTX API request failed: {e}")
+                otx = OTXv2(OTX_API_KEY)
+                if ioc_type.upper() == "DOMAIN":
+                    otx_results = otx.get_indicator_details_full(IndicatorTypes.DOMAIN, value)
+                elif ioc_type.upper() == "IP":
+                    otx_results = otx.get_indicator_details_full(IndicatorTypes.IPv4, value)
+                elif ioc_type.upper() == "HASH":
+                    otx_results = otx.get_indicator_details_full(IndicatorTypes.FILE_HASH_MD5, value)
+                else:
+                    log_event(f"[ERROR] Unsupported IOC type: {ioc_type}")
+                    return results
 
-    return results
+                results["OTX"] = otx_results
+                store_result(ioc_type, value, "OTX", results["OTX"])
+            except Exception as e:
+                log_event(f"[ERROR] OTX API query failed: {e}")
+
+        return results
+
 
 def save_output(results, filename):
     try:
@@ -66,9 +75,9 @@ def save_output(results, filename):
         log_event(f"[ERROR] Failed to save output: {e}")
 
 def run():
-    ioc_type = "ip"
-    value = "1.1.1.1"
-    
+    ioc_type = "ip", "domain", "hash"
+    value = "1.1.1.1", "example.com", "hash_value"
+
     results = fetch_threat_intel(ioc_type, value)
     save_output(results, CONFIG["THREAT_INTEL_REPORT"])
 

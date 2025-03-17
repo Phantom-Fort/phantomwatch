@@ -19,6 +19,7 @@ sigmatools
 elasticsearch
 pyyaml
 shodan
+OTXv2
 
 # Utility and Performance
 tqdm
