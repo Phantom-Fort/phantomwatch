@@ -92,6 +92,7 @@ def get_user_inputs(module):
 
 def execute_module(module):
     """Executes the specified module after collecting necessary inputs."""
+
     if module not in MODULES:
         OutputFormatter.print_message("[-] Invalid module specified. Use 'list-modules' to list available modules.", "error")
         log_event(f"Invalid module specified: {module}", "warning")
@@ -115,21 +116,21 @@ def execute_module(module):
                 OutputFormatter.print_message("[-] API key not set. Module execution aborted.", "error")
             return
 
-    # Collect user inputs
+    # Collect user inputs based on the module's required flags
     user_inputs = get_user_inputs(module)
     if not user_inputs:
-        return  # Abort execution if missing input
+        return  # Abort execution if missing inputt
 
     # Execute the module safely
     try:
-        MODULES[module].run(**user_inputs)
+        MODULES[module](**user_inputs)
         OutputFormatter.print_message(f"[+] Module '{module}' executed successfully.", "success")
         log_event(f"Successfully executed module: {module}", "success")
     except AttributeError:
         OutputFormatter.print_message(f"[-] Error: Module '{module}' execution failed.", "error")
         log_event(f"Module '{module}' is missing a 'run' function.", "error")
     except Exception as e:
-        OutputFormatter.print_message(f"[-] Error executing module '{module}': {str(e)}", "error")
+        log_event(f"Error executing module '{module}': {str(e)}", "error")
 
 def list_modules():
     """Lists available modules."""
@@ -137,7 +138,6 @@ def list_modules():
     for mod in MODULES.keys():
         OutputFormatter.print_message(f"  - {mod}", "success")
     print("")
-
 
 # List of commands for auto-completion
 
