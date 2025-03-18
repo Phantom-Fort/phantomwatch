@@ -38,7 +38,7 @@ def log_incident(action, target, status):
     )
     conn.commit()
     conn.close()
-    log_event(f"[*] Incident logged: {action} on {target} (Status: {status})")
+    log_event(f"[*] Incident logged: {action} on {target} (Status: {status})", "info")
 
 def fetch_threat_intel(ioc_type, value):
     """Fetch threat intelligence from the database."""
@@ -71,7 +71,7 @@ def save_config(updated_config):
     config_path = os.path.join(os.path.dirname(__file__), "config", "config.json")
     with open(config_path, "w") as config_file:
         json.dump(updated_config, config_file, indent=4)
-    log_event("[*] Configuration updated successfully.")
+    log_event("[*] Configuration updated successfully.", "info")
 
 def set_api_key(service, api_key):
     """Sets an API key in the .env file."""
@@ -79,7 +79,7 @@ def set_api_key(service, api_key):
     
     set_key(env_path, service.upper(), api_key)
     OutputFormatter.print_message(f"[+] API key for {service.upper()} set successfully.", "success")
-    log_event(f"API key for {service.upper()} updated.")
+    log_event(f"API key for {service.upper()} updated.", "info")
 
 def get_api_key(service_name):
     """Retrieve API keys securely from environment variables or config.json."""
@@ -115,7 +115,7 @@ def store_sigma_match(rule_name, description, log_entry, filename="sigma_matches
         json.dump(data, f, indent=4)
 
     # Log the event
-    log_event(f"[*] Sigma match stored: Rule - {rule_name}, Description - {description}")
+    log_event(f"[*] Sigma match stored: Rule - {rule_name}, Description - {description}", "info")
 
 
 def init_db():
@@ -145,37 +145,40 @@ def init_db():
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)''',
 
-        "exploit_finder": '''CREATE TABLE IF NOT EXISTS sigma_rules (
+        "exploit_finder": '''CREATE TABLE IF NOT EXISTS exploit_finder (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)''',
 
-        "forensic_analysis": '''CREATE TABLE IF NOT EXISTS sigma_rules (
+        "forensic_analysis": '''CREATE TABLE IF NOT EXISTS forensic_analysis (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)''',
 
-        "malware_analysis": '''CREATE TABLE IF NOT EXISTS sigma_rules (
+        "malware_analysis": '''CREATE TABLE IF NOT EXISTS malware_analysis (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)''',
 
-        "network_scanner": '''CREATE TABLE IF NOT EXISTS sigma_rules (
+        "network_scanner": '''CREATE TABLE IF NOT EXISTS network_scanner (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)''',
 
-        "osint_recon": '''CREATE TABLE IF NOT EXISTS sigma_rules (
+        "osint_recon": '''CREATE TABLE IF NOT EXISTS osint_recon (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)''',
 
-        "websec_scanner": '''CREATE TABLE IF NOT EXISTS sigma_rules (
+        "websec_scanner": '''CREATE TABLE IF NOT EXISTS websec_scanner (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)'''
+                        log TEXT, rule_name TEXT, severity TEXT, timestamp TEXT)''',
+
+        "incident_tracking": '''CREATE TABLE IF NOT EXISTS incident_tracking (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        incident_id TEXT, status TEXT, timestamp TEXT)'''
     }
-
     for table, query in tables.items():
         cursor.execute(query)
 
     conn.commit()
     conn.close()
-    log_event("Database initialized successfully.")
+    log_event("Database initialized successfully.", "info")
 
 def store_result(table, log, rule_name, severity="Medium"):
     """Store scan results in the database."""
@@ -187,7 +190,7 @@ def store_result(table, log, rule_name, severity="Medium"):
     )
     conn.commit()
     conn.close()
-    log_event(f"[*] Stored result in {table}: {rule_name} -> {log} (Severity: {severity})")
+    log_event(f"[*] Stored result in {table}: {rule_name} -> {log} (Severity: {severity})", "info")
 
 def store_siem_results(table_name, data):
     conn = sqlite3.connect(CONFIG["DATABASE_PATH"])
@@ -234,4 +237,4 @@ if __name__ == "__main__":
         set_api_key(service_name, api_key)
     else:
         check_requirements()
-        log_event("[*] All checks passed. PhantomWatch is ready to run.")
+        log_event("[*] All checks passed. PhantomWatch is ready to run.", "info")

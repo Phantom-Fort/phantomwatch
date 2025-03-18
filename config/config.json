@@ -4,4 +4,6 @@
     "DB_TYPE": "sqlite",
     "DATABASE_PATH": "phantomwatch.db",
     "API_TIMEOUT": 30
+    
 }
+

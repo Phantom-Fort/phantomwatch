@@ -56,7 +56,7 @@ def scan_network(target):
 def run():
     target_ip = "192.168.1.1/24"  # Change to target
     results = scan_network(target_ip)
-    log_event(f"Scan results for {target_ip}: {json.dumps(results, indent=4)}")
+    log_event(f"Scan results for {target_ip}: {json.dumps(results, indent=4)}", "info")
     store_result(results)
     save_output("network_scan_results.json", results)
     print(json.dumps(results, indent=4))

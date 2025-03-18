@@ -10,9 +10,9 @@ def is_connected():
     except OSError:
         return False
  
-font_list = {"3-d", "slant", "sub-zero", "lean", "shadow", "speed", "standard"}
+font_list = {"slant", "sub-zero", "lean", "shadow", "standard"}
 
-def generate_ascii_art(text, width=80):
+def generate_ascii_art(text, width=100):
     """Generate ASCII art for the given text using pyfiglet."""
     font = random.choice(list(font_list))
     try:
@@ -32,7 +32,7 @@ def display_banner():
     if is_connected():
         # Generate ASCII Art Dynamically
         ascii_text = generate_ascii_art("PHANTOMWATCH")
-        banner = f"{RED}{BOLD}\n{'-' * 80}\n{CYAN}{ascii_text}{CYAN}\n[ PHANTOMWATCH ] - Ultimate SOC Automation Tool\n{RESET}{'-' * 80}"
+        banner = f"{RED}{BOLD}\n{'-' * 100}\n{CYAN}{ascii_text}{CYAN}\n[ PHANTOMWATCH ] - Ultimate SOC Automation Tool\n{RESET}{'-' * 100}"
     else:
         # Default ASCII Banners (No Internet)
         default_banners = [

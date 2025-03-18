@@ -7,7 +7,7 @@ from config.config import CONFIG
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from core.output_formatter import OutputFormatter
-from modules.utils import log_event, get_saved_results
+from modules.utils import log_event, get_saved_results, get_api_key
 from core.help import display_help
 from modules import (
     incident_response, 
@@ -46,16 +46,16 @@ MODULE_FLAGS = {
 
 # Load available modules
 MODULES = {
-    "incident-response": incident_response,
-    "siem-analysis": siem_analysis,
-    "threat-intel": threat_intel,
-    "yara-scan": yara_scan,
-    "malware-analysis": malware_analysis,
-    "osint-recon": osint_recon,
-    "forensic-analysis": forensic_analysis,
-    "websec-scanner": websec_scanner,
-    "network-scanner": network_scanner,
-    "exploit-finder": exploit_finder,
+    "incident-response": incident_response.run,
+    "siem-analysis": siem_analysis.run,
+    "threat-intel": threat_intel.run,
+    "yara-scan": yara_scan.run,
+    "malware-analysis": malware_analysis.run,
+    "osint-recon": osint_recon.run,
+    "forensic-analysis": forensic_analysis.run,
+    "websec-scanner": websec_scanner.run,
+    "network-scanner": network_scanner.run,
+    "exploit-finder": exploit_finder.run,
 }
 
 def get_user_inputs(module):
@@ -90,7 +90,6 @@ def get_user_inputs(module):
     user_inputs[selected_flag] = input(f"Enter the {selected_flag}: ").strip()
     return user_inputs  # Return user input as a dictionary
 
-
 def execute_module(module):
     """Executes the specified module after collecting necessary inputs."""
     if module not in MODULES:
@@ -104,50 +103,33 @@ def execute_module(module):
     required_api_key = getattr(MODULES[module], "REQUIRED_API_KEY", None)
 
     if required_api_key:
-        env_path = CONFIG.get("env_path", os.path.join(os.path.dirname(__file__), "../config/secrets.env"))
-        api_keys = dotenv_values(env_path)
+        api_keys = get_api_key(required_api_key)
 
         if required_api_key not in api_keys or not api_keys[required_api_key].strip():
             OutputFormatter.print_message(f"[-] Error: The module '{module}' requires the API key '{required_api_key}' to be set.", "error")
             
             set_key = input(f"Do you want to set the API key for '{required_api_key}' now? (y/n): ").strip().lower()
             if set_key == "y":
-                new_api_key = input(f"Enter the API key for '{required_api_key}': ").strip()
-                if new_api_key:
-                    with open(env_path, "a") as env_file:
-                        env_file.write(f"\n{required_api_key}={new_api_key}\n")
-
-                    OutputFormatter.print_message(f"[+] API key for '{required_api_key}' has been set.", "success")
-
-                    # Reload the API keys after updating the .env file
-                    api_keys = dotenv_values(env_path)
-                else:
-                    OutputFormatter.print_message("[-] No API key provided. Module execution aborted.", "error")
-                    return
+                OutputFormatter.print_message(f"Use the command 'set-api {required_api_key} <your_api_key>' to set the API key.", "info")
             else:
                 OutputFormatter.print_message("[-] API key not set. Module execution aborted.", "error")
-                return
-
-    # Execute the module safely
-    try:
-        MODULES[module].run()  # Assuming modules have a `run()` function
-        OutputFormatter.print_message(f"[+] Module '{module}' executed successfully.", "success")
-    except Exception as e:
-        OutputFormatter.print_message(f"[-] Error executing module '{module}': {str(e)}", "error")
-        log_event(f"Module execution failed: {module}, Error: {str(e)}", "error")
+            return
 
     # Collect user inputs
     user_inputs = get_user_inputs(module)
     if not user_inputs:
         return  # Abort execution if missing input
 
+    # Execute the module safely
     try:
-        # Pass user inputs as arguments to the module's run() function
-        MODULES[module].main(**user_inputs)
+        MODULES[module].run(**user_inputs)
+        OutputFormatter.print_message(f"[+] Module '{module}' executed successfully.", "success")
         log_event(f"Successfully executed module: {module}", "success")
     except AttributeError:
-        OutputFormatter.print_message("[-] Error: Selected module does not have a 'run' function.", "error")
+        OutputFormatter.print_message(f"[-] Error: Module '{module}' execution failed.", "error")
         log_event(f"Module '{module}' is missing a 'run' function.", "error")
+    except Exception as e:
+        OutputFormatter.print_message(f"[-] Error executing module '{module}': {str(e)}", "error")
 
 def list_modules():
     """Lists available modules."""
@@ -249,7 +231,6 @@ def interactive_shell():
 
             elif cmd.lower() == "run":
                 if selected_module:
-                    OutputFormatter.print_message(f"[+] Running selected module: {selected_module}", "info")
                     execute_module(selected_module)
                     os.system(f"phantomwatch -m {selected_module}")  # Execute via CLI, if applicable
                 else:
