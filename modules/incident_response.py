@@ -65,19 +65,19 @@ def track_incident(case_id, action, status):
     conn.commit()
     conn.close()
 
-def run():
-    ioc_type = "ip"
-    value = "1.1.1.1"
-    results = fetch_threat_intel(ioc_type, value)
-    save_output(results, "report.json")
-    log_event("[*] Threat intelligence report saved.", "info")
-    track_incident("IR001", "Threat Intelligence Fetch", "Completed")
 
-def run_forensic_analysis():
+def run():
+    log_file = input("Enter the path to the incident log file: ")
+
     try:
-        subprocess.run(["volatility", "-f", CONFIG["MEMORY_DUMP"], "imageinfo"], check=True)
+        subprocess.run(["volatility", "-f", log_file, "imageinfo"], check=True)
         log_incident("Forensic Analysis", "Memory Dump", "Completed")
-        store_result("incident_cases", {"action": "Forensic Analysis", "target": "Memory Dump", "status": "Completed", "timestamp": datetime.utcnow().isoformat()})
+        store_result("incident_cases", {
+            "action": "Forensic Analysis",
+            "target": "Memory Dump",
+            "status": "Completed",
+            "timestamp": datetime.utcnow().isoformat()
+        })
     except Exception as e:
         log_incident("Forensic Analysis", "Memory Dump", f"Failed: {e}")
 

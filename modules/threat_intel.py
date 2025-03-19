@@ -67,11 +67,12 @@ def fetch_threat_intel(ioc_type, value):
         return results
 
 def run():
-    ioc_type = "ip", "domain", "hash"
-    value = "1.1.1.1", "example.com", "hash_value"
+    ioc_type = input("Enter the IOC type (ip, domain, hash): ")
+    value = input(f"Enter the {ioc_type} value: ")
 
     results = fetch_threat_intel(ioc_type, value)
     save_output(results, CONFIG["THREAT_INTEL_REPORT"])
 
 if __name__ == "__main__":
     run()
+

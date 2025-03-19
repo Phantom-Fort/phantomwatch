@@ -117,7 +117,9 @@ def analyze_siem_logs():
         log_event(f"[ERROR] Log analysis failed {str(e)}", "error")
 
 def run():
-    analyze_siem_logs()
+    log_file = input("Enter the SIEM log file path: ")
+    analyze_siem_logs(log_file)
 
 if __name__ == "__main__":
     run()
+

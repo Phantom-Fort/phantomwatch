@@ -70,8 +70,11 @@ def analyze_memory(memory_path):
 
 
 def run():
-    """Executes the forensic analysis on disk image and memory dump."""
-    forensic_results = analyze_disk(DISK_IMAGE) + analyze_memory(MEMORY_DUMP)
+    """Executes forensic analysis on disk image and memory dump."""
+    disk_image = input("Enter the path to the disk image: ")
+    memory_dump = input("Enter the path to the memory dump: ")
+
+    forensic_results = analyze_disk(disk_image) + analyze_memory(memory_dump)
     if forensic_results:
         save_output(forensic_results, ANALYSIS_OUTPUT)
         store_result("forensic_analysis", ANALYSIS_OUTPUT, "Forensic artifacts extracted")
@@ -80,3 +83,4 @@ def run():
 
 if __name__ == "__main__":
     run()
+

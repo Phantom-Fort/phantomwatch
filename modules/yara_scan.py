@@ -77,12 +77,13 @@ def fetch_hybrid_analysis(file_hash):
         log_event(f"HybridAnalysis API request failed: {response.status_code} - {response.text}", "error")
         return None
 
-
 def run():
-    scan_results = scan_file_with_yara(SAMPLE_FILE)
+    sample_file = input("Enter the file path for YARA scan: ")
+
+    scan_results = scan_file_with_yara(sample_file)
     if scan_results:
         save_output(scan_results, SCAN_OUTPUT_FILE)
-        
+
         # Fetch threat intelligence from HybridAnalysis
         file_hash = "some_calculated_hash"  # Replace with actual file hash calculation
         intel_data = fetch_hybrid_analysis(file_hash)

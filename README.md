@@ -41,7 +41,7 @@ Ensure your system has the following installed:
 3. Verify installation:
 
    ```sh
-   phantomwatch --help
+   phantomwatch
    ```
 
 ## Usage
@@ -49,19 +49,13 @@ Ensure your system has the following installed:
 ### Listing Available Modules
 
 ```sh
-phantomwatch list-modules
+phantomwatch
 ```
 
 ### Running a Module
 
 ```sh
-phantomwatch run -m incident-response
-```
-
-### Viewing Help
-
-```sh
-phantomwatch --help
+phantomwatch run -m <module-name>
 ```
 
 ## Configuration
@@ -98,8 +92,8 @@ Correlates logs from multiple sources and applies Sigma rules for threat detecti
 
 ### Threat Intelligence
 Queries threat databases for malicious indicators (IPs, domains, files).
-- **Tools**: VirusTotal, AbuseIPDB
-- **API**: VirusTotal API, AbuseIPDB API
+- **Tools**: VirusTotal, MISP, OTXv2
+- **API**: VirusTotal API, MISP_URL, MISP API, OTX API
 
 ### YARA Scan
 Scans files and memory for malware using YARA rules.

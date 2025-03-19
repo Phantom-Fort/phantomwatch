@@ -64,8 +64,8 @@ def display_help():
                        API: ElasticSearch API
 
     {BOLD}Threat Intelligence{RESET}   Queries threat databases for malicious indicators (IPs, domains, files).
-                       Tools: VirusTotal, AbuseIPDB
-                       API: VirusTotal API, AbuseIPDB API
+                       Tools: VirusTotal, MISP, OTX
+                       API: VirusTotal API, MISP_URL, MISP API, OTX API
 
     {BOLD}YARA Scan{RESET}             Scans files and memory for malware using YARA rules.
                        Tools: YARA, HybridAnalysis

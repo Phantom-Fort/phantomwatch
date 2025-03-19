@@ -72,7 +72,7 @@ def osint_recon(target):
     return results
 
 def run():
-    target = input("Enter target domain or IP: ")
+    target = input("Enter target (domain, email, or IP address): ")
     osint_recon(target)
 
 if __name__ == "__main__":

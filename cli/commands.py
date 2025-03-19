@@ -129,7 +129,7 @@ def execute_module(module):
 
     # Step 3: Execute the module
     try:
-        MODULES[module](list(user_inputs.values())[0])
+        MODULES[module](user_inputs[next(iter(user_inputs))])
         OutputFormatter.print_message(f"[+] Module '{module}' executed successfully.", "success")
         log_event(f"Successfully executed module: {module}", "success")
     except TypeError as e:
@@ -187,9 +187,6 @@ def interactive_shell():
                 selected_module = None
                 OutputFormatter.print_message("[+] Module deselected.", "info")
 
-            elif cmd.lower() == "list":
-                list_modules()
-
             elif cmd.lower() == "view-api":
                 view_api_keys()
 
@@ -197,45 +194,42 @@ def interactive_shell():
                 os.system("clear")
             
             elif cmd.lower() == "logs":
-                os.system("less logs/phantomwatch.log")
+                with open("logs/phantomwatch.log", "r") as log_file:
+                    while True:
+                        lines = log_file.readlines(50)
+                        if not lines:
+                            break
+                        for line in lines:
+                            print(line, end="")
+                        input("\nPress Enter to continue...")
 
             elif cmd.lower() == "reports":
-                # List available tables
-                tables = get_saved_results("tables")
-                if not tables:
-                    OutputFormatter.print_message("[-] No tables found.", "warning")
-                    continue
-
-                print("[INFO] Available tables:")
-                for i, table in enumerate(tables, start=1):
-                    print(f"  {i}. {table}")
-
-                table_choice = input("Enter the number corresponding to the table you want to view: ").strip()
-                try:
-                    table_choice = int(table_choice)
-                    if 1 <= table_choice <= len(tables):
-                        selected_table = tables[table_choice - 1]
+                if selected_module:
+                    # Fetch and display the latest result for the selected module
+                    results = get_saved_results(selected_module)
+                    if results:
+                        print(f"[+] Latest result for '{selected_module}': {results[-1]}")
                     else:
-                        OutputFormatter.print_message(f"[-] Error: Invalid choice '{table_choice}'.", "error")
-                        continue
-                except ValueError:
-                    OutputFormatter.print_message(f"[-] Error: Please enter a valid number.", "error")
-                    continue
-
-                # Fetch and display results from the selected table
-                results = get_saved_results(selected_table)
-                if results:
-                    print(f"[+] Latest result from '{selected_table}': {results[0]}")
+                        OutputFormatter.print_message(f"[-] No results found for '{selected_module}'.", "warning")
                 else:
-                    OutputFormatter.print_message(f"[-] No results found in '{selected_table}'.", "warning")
+                    OutputFormatter.print_message("[-] No module selected. Use 'use <module>' first.", "error")
 
             elif cmd.lower().startswith("use "):
-                module = cmd.split(" ", 1)[1]
-                if module in MODULES:
-                    selected_module = module
-                    OutputFormatter.print_message(f"[+] Selected module: {module}", "success")
+                if selected_module:
+                    OutputFormatter.print_message("[-] A module is already selected. Use 'back' to deselect the current module first.", "error")
                 else:
-                    OutputFormatter.print_message("[-] Error: Invalid module. Use 'list-modules' to view available modules.", "error")
+                    module = cmd.split(" ", 1)[1]
+                    if module in MODULES:
+                        selected_module = module
+                        OutputFormatter.print_message(f"[+] Selected module: {module}", "success")
+                    else:
+                        OutputFormatter.print_message("[-] Error: Invalid module. Use 'list' to view available modules.", "error")
+
+            elif cmd.lower() == "list":
+                if selected_module:
+                    OutputFormatter.print_message("[-] A module is already selected. Use 'back' to deselect the current module first.", "error")
+                else:
+                    list_modules()
 
             elif cmd.lower() == "run":
                 if selected_module:

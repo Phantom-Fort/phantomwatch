@@ -54,7 +54,7 @@ def scan_network(target):
         return {"message": "No open ports found."}
 
 def run():
-    target_ip = "192.168.1.1/24"  # Change to target
+    target_ip = input("Enter the network range (e.g., 192.168.1.1/24): ")
     results = scan_network(target_ip)
     log_event(f"Scan results for {target_ip}: {json.dumps(results, indent=4)}", "info")
     store_result(results)
@@ -63,3 +63,4 @@ def run():
 
 if __name__ == "__main__":
     run()
+

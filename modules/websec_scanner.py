@@ -76,8 +76,8 @@ def websec_scan(target):
     return final_results
 
 def run():
-    target_url = "https://example.com"
+    target_url = input("Enter the target URL: ")
     websec_scan(target_url)
-    
+
 if __name__ == "__main__":
     run()
