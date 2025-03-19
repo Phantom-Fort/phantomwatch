@@ -65,21 +65,37 @@ def track_incident(case_id, action, status):
     conn.commit()
     conn.close()
 
-
-def run():
-    log_file = input("Enter the path to the incident log file: ")
+def run(log_file):
+    """Executes incident response analysis on a log file."""
+    
+    if not log_file:
+        print("[-] Error: Missing log file path.")
+        return
 
     try:
-        subprocess.run(["volatility", "-f", log_file, "imageinfo"], check=True)
+        # Run Volatility against the log file
+        result = subprocess.run(["volatility", "-f", log_file, "imageinfo"], check=True, capture_output=True, text=True)
+        
+        # Store and log results
         log_incident("Forensic Analysis", "Memory Dump", "Completed")
         store_result("incident_cases", {
             "action": "Forensic Analysis",
             "target": "Memory Dump",
             "status": "Completed",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
+            "output": result.stdout  # Store output for reference
         })
-    except Exception as e:
+
+    except FileNotFoundError:
+        print("[-] Error: Volatility is not installed or not found in PATH.")
+    except subprocess.CalledProcessError as e:
         log_incident("Forensic Analysis", "Memory Dump", f"Failed: {e}")
+        print(f"[-] Command execution failed: {e}")
 
 if __name__ == "__main__":
-    run()
+    if len(sys.argv) < 2:
+        print("Usage: python -m modules.incident_response <log_file>")
+        sys.exit(1)
+
+    log_file = sys.argv[1]  # Get log file path from CLI
+    run(log_file)

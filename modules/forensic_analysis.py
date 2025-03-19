@@ -69,12 +69,23 @@ def analyze_memory(memory_path):
         return []
 
 
-def run():
-    """Executes forensic analysis on disk image and memory dump."""
-    disk_image = input("Enter the path to the disk image: ")
-    memory_dump = input("Enter the path to the memory dump: ")
+def run(file_path):
+    """Executes forensic analysis on either a disk image or a memory dump."""
+    
+    if not file_path:
+        log_event("Missing required forensic analysis input.", "error")
+        return
+    
+    forensic_results = []
+    
+    if file_path.endswith(".img"):  # Disk Image Analysis
+        forensic_results = analyze_disk(file_path)
+    elif file_path.endswith(".dmp"):  # Memory Dump Analysis
+        forensic_results = analyze_memory(file_path)
+    else:
+        log_event("Invalid file format. Provide a valid disk image (.img) or memory dump (.dmp).", "error")
+        return
 
-    forensic_results = analyze_disk(disk_image) + analyze_memory(memory_dump)
     if forensic_results:
         save_output(forensic_results, ANALYSIS_OUTPUT)
         store_result("forensic_analysis", ANALYSIS_OUTPUT, "Forensic artifacts extracted")
@@ -82,5 +93,11 @@ def run():
         log_event("No forensic artifacts found.", "warning")
 
 if __name__ == "__main__":
-    run()
+    import sys
+    if len(sys.argv) < 2:
+        print("Usage: python -m modules.forensic_analysis <file_path>")
+        sys.exit(1)
+
+    file_path = sys.argv[1]  # Accepts either a disk image or a memory dump
+    run(file_path)
 

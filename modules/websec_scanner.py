@@ -75,9 +75,22 @@ def websec_scan(target):
     
     return final_results
 
-def run():
-    target_url = input("Enter the target URL: ")
-    websec_scan(target_url)
+def run(target_url):
+    """Runs the web security scanner on the given URL."""
+    
+    print(f"[+] Scanning {target_url} for security vulnerabilities...")
+
+    try:
+        websec_scan(target_url)
+        log_event(f"Web security scan completed for {target_url}.", "info")
+    except Exception as e:
+        log_event(f"Error during web security scan: {e}", "error")
+        print(f"[-] Scan failed: {e}")
 
 if __name__ == "__main__":
-    run()
+    if len(sys.argv) < 2:
+        print("Usage: python -m modules.websec_scanner <target_url>")
+        sys.exit(1)
+
+    target_url = sys.argv[1]
+    run(target_url)

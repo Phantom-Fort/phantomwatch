@@ -71,9 +71,32 @@ def osint_recon(target):
     store_result ("osint_recon", target, "osint_recon")
     return results
 
-def run():
-    target = input("Enter target (domain, email, or IP address): ")
-    osint_recon(target)
+def run(target):
+    """Runs OSINT reconnaissance on the given target."""
+    
+    if not target:
+        print("[-] Error: No target provided.")
+        return
+
+    print(f"[+] Running OSINT reconnaissance on: {target}")
+
+    try:
+        results = osint_recon(target) or {}
+
+        log_event(f"OSINT results for {target}: {json.dumps(results, indent=4)}", "info")
+        store_result("osint_recon", target, results)
+        save_output("osint_recon_results.json", results)
+
+        print(json.dumps(results, indent=4))
+
+    except Exception as e:
+        print(f"[-] Error during OSINT reconnaissance: {e}")
 
 if __name__ == "__main__":
-    run()
+    if len(sys.argv) < 2:
+        print("Usage: python -m modules.osint_recon <target>")
+        sys.exit(1)
+
+    target = sys.argv[1]  # Get target from CLI
+    run(target)
+

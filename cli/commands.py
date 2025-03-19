@@ -121,15 +121,17 @@ def execute_module(module):
         OutputFormatter.print_message(f"[INFO] API keys for '{module}' are set.\n", "info")
     else:
         OutputFormatter.print_message(f"[INFO] '{module}' is accessible offline.\n", "info")
-
-    # Step 2: Retrieve required flag input
     user_inputs = get_required_flag(module)
     if not user_inputs:
         return  # Abort execution if input is missing
 
+    print(f"[DEBUG] user_inputs: {user_inputs}")  # Debugging print
+
     # Step 3: Execute the module
     try:
-        MODULES[module](user_inputs[next(iter(user_inputs))])
+        arg_value = user_inputs.popitem()[1]
+        print(f"[DEBUG] Passing argument to {module}: {arg_value}")  # Debugging print
+        MODULES[module](arg_value)
         OutputFormatter.print_message(f"[+] Module '{module}' executed successfully.", "success")
         log_event(f"Successfully executed module: {module}", "success")
     except TypeError as e:

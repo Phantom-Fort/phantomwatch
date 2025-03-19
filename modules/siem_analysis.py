@@ -12,7 +12,7 @@ from sigma.pipelines.elasticsearch import ecs_windows
 from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from .utils import log_event, init_db, store_siem_results, store_sigma_match, save_output
+from .utils import log_event, init_db, store_siem_results, save_output, store_result
 from config.config import CONFIG
 
 # Initialize Database
@@ -116,10 +116,29 @@ def analyze_siem_logs():
     except Exception as e:
         log_event(f"[ERROR] Log analysis failed {str(e)}", "error")
 
-def run():
-    log_file = input("Enter the SIEM log file path: ")
-    analyze_siem_logs(log_file)
+def run(log_file):
+    """Runs SIEM log analysis on the given log file."""
+    
+    if not log_file:
+        print("[-] Error: No SIEM log file provided.")
+        return
+
+    print(f"[+] Analyzing SIEM logs from: {log_file}")
+
+    try:
+        analyze_siem_logs(log_file)
+        log_event(f"SIEM log analysis completed for {log_file}", "info")
+        store_result("siem_analysis", log_file, "analysis_completed")
+
+    except Exception as e:
+        print(f"[-] Error during SIEM log analysis: {e}")
 
 if __name__ == "__main__":
-    run()
+    if len(sys.argv) < 2:
+        print("Usage: python -m modules.siem_analysis <log_file>")
+        sys.exit(1)
+
+    log_file = sys.argv[1]  # Get log file from CLI
+    run(log_file)
+
 

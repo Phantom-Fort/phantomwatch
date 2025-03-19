@@ -3,6 +3,7 @@ import os
 import json
 import requests
 import sys
+import hashlib
 from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -77,20 +78,45 @@ def fetch_hybrid_analysis(file_hash):
         log_event(f"HybridAnalysis API request failed: {response.status_code} - {response.text}", "error")
         return None
 
-def run():
-    sample_file = input("Enter the file path for YARA scan: ")
+def calculate_file_hash(file_path):
+    """Calculates SHA256 hash of a file."""
+    try:
+        with open(file_path, "rb") as f:
+            return hashlib.sha256(f.read()).hexdigest()
+    except Exception as e:
+        print(f"[-] Error calculating file hash: {e}")
+        return None
 
-    scan_results = scan_file_with_yara(sample_file)
-    if scan_results:
-        save_output(scan_results, SCAN_OUTPUT_FILE)
+def run(sample_file):
+    """Runs YARA scan and fetches threat intelligence if necessary."""
+    
+    print(f"[+] Scanning file with YARA: {sample_file}")
+    
+    try:
+        scan_results = scan_file_with_yara(sample_file)
+        if scan_results:
+            save_output(scan_results, SCAN_OUTPUT_FILE)
+            log_event(f"YARA scan completed for {sample_file}.", "info")
 
-        # Fetch threat intelligence from HybridAnalysis
-        file_hash = "some_calculated_hash"  # Replace with actual file hash calculation
-        intel_data = fetch_hybrid_analysis(file_hash)
-        if intel_data:
-            save_output(intel_data, "results/hybrid_analysis_results.json")
-    else:
-        log_event("No YARA matches found.")
+            # Calculate file hash for threat intelligence
+            file_hash = calculate_file_hash(sample_file)
+            if file_hash:
+                print(f"[+] Fetching HybridAnalysis threat intelligence for hash: {file_hash}")
+                intel_data = fetch_hybrid_analysis(file_hash)
+                if intel_data:
+                    save_output(intel_data, "results/hybrid_analysis_results.json")
+                    log_event(f"Threat intelligence stored for hash {file_hash}.", "info")
+        else:
+            log_event("No YARA matches found.", "warning")
+
+    except Exception as e:
+        print(f"[-] Error running YARA scan: {e}")
 
 if __name__ == "__main__":
-    run()
+    if len(sys.argv) < 2:
+        print("Usage: python -m modules.yara_scan <file_path>")
+        sys.exit(1)
+
+    sample_file = sys.argv[1]
+    run(sample_file)
+

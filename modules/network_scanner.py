@@ -1,6 +1,8 @@
 import subprocess
 import json
 import re
+import os
+import sys
 from datetime import datetime
 from .utils import store_result, log_event, save_output
 
@@ -53,14 +55,32 @@ def scan_network(target):
     else:
         return {"message": "No open ports found."}
 
-def run():
-    target_ip = input("Enter the network range (e.g., 192.168.1.1/24): ")
-    results = scan_network(target_ip)
-    log_event(f"Scan results for {target_ip}: {json.dumps(results, indent=4)}", "info")
-    store_result(results)
-    save_output("network_scan_results.json", results)
-    print(json.dumps(results, indent=4))
+def run(target_ip):
+    """Scans a given network range."""
+    
+    if not target_ip:
+        print("[-] Error: No network range provided.")
+        return
+
+    print(f"[+] Scanning network range: {target_ip}")
+
+    try:
+        results = scan_network(target_ip) or {}
+
+        log_event(f"Scan results for {target_ip}: {json.dumps(results, indent=4)}", "info")
+        store_result("network_scanner", target_ip, results)
+        save_output("network_scan_results.json", results)
+
+        print(json.dumps(results, indent=4))
+
+    except Exception as e:
+        print(f"[-] Error during network scan: {e}")
 
 if __name__ == "__main__":
-    run()
+    if len(sys.argv) < 2:
+        print("Usage: python -m modules.network_scanner <network_range>")
+        sys.exit(1)
+
+    target_ip = sys.argv[1]  # Get network range from CLI
+    run(target_ip)
 

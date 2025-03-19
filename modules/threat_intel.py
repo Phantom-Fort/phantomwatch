@@ -1,6 +1,7 @@
 import json
 import requests
 import os
+import re
 import sys
 from datetime import datetime
 from OTXv2 import OTXv2, IndicatorTypes
@@ -66,13 +67,45 @@ def fetch_threat_intel(ioc_type, value):
 
         return results
 
-def run():
-    ioc_type = input("Enter the IOC type (ip, domain, hash): ")
-    value = input(f"Enter the {ioc_type} value: ")
+def detect_ioc(value):
+    """Detects whether the given value is an IP, domain, or hash."""
+    
+    ip_pattern = r"^\d{1,3}(\.\d{1,3}){3}$"
+    domain_pattern = r"^(?!-)[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+    hash_pattern = r"^[a-fA-F0-9]{32,64}$"  # MD5, SHA-1, SHA-256
 
-    results = fetch_threat_intel(ioc_type, value)
-    save_output(results, CONFIG["THREAT_INTEL_REPORT"])
+    if re.match(ip_pattern, value):
+        return "ip"
+    elif re.match(domain_pattern, value):
+        return "domain"
+    elif re.match(hash_pattern, value):
+        return "hash"
+    else:
+        return None
+
+def run(ioc_value):
+    """Runs threat intelligence lookup based on detected IOC type."""
+
+    ioc_type = detect_ioc(ioc_value)
+    if not ioc_type:
+        print(f"[-] Invalid IOC format: {ioc_value}")
+        sys.exit(1)
+
+    print(f"[+] Detected {ioc_type}: {ioc_value}")
+    
+    try:
+        results = fetch_threat_intel(ioc_type, ioc_value)
+        save_output(results, CONFIG["THREAT_INTEL_REPORT"])
+        print("[+] Threat intelligence lookup completed.")
+    except Exception as e:
+        print(f"[-] Error: {e}")
 
 if __name__ == "__main__":
-    run()
+    if len(sys.argv) < 2:
+        print("Usage: python -m modules.threat_intel <IOC_value>")
+        sys.exit(1)
+
+    ioc_value = sys.argv[1]
+    run(ioc_value)
+
 
