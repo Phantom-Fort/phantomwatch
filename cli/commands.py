@@ -141,7 +141,7 @@ def list_modules():
 
 # List of commands for auto-completion
 
-COMMANDS = ["help", "back", "list-modules", "view-api", "use", "run", "set-api", "logs", "reports" "clear", "exit", "quit", "run {module}", "set-api {service} {api_key}", "use {module}"]
+COMMANDS = ["help", "back", "list", "view-api", "use", "run", "set-api", "logs", "reports" "clear", "exit", "quit", "run {module}", "set-api {service} {api_key}", "use {module}"]
 
 
 def completer(text, state):
@@ -160,7 +160,7 @@ def interactive_shell():
 
     while True:
         try:
-            prompt = f"phantomwatch{f'/{selected_module}' if selected_module else ''}> "
+            prompt = f"phantomwatch{f'({selected_module})' if selected_module else ''}> "
             cmd = input(prompt).strip()
             
             if not cmd:
@@ -179,7 +179,7 @@ def interactive_shell():
                 selected_module = None
                 OutputFormatter.print_message("[+] Module deselected.", "info")
 
-            elif cmd.lower() == "list-modules":
+            elif cmd.lower() == "list":
                 list_modules()
 
             elif cmd.lower() == "view-api":

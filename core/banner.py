@@ -53,7 +53,7 @@ def display_banner():
 ||    \|____________|\|__|\|__|    \|__|  \|_______|\|__|\|__|                     ||
 ||                                                                                 ||
 ||                                                                                 ||
-||                 {RED}PHANTOMWATCH - Ultimate SOC Automation Tool{RESET}                     ||
+||                 {RED}PHANTOMWATCH - Ultimate SOC Automation Tool{RESET}                     {CYAN}||
 >>=================================================================================<<{RESET}
             """
         ]

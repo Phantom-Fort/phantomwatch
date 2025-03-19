@@ -36,7 +36,7 @@ def display_help():
       {BOLD}clear{RESET}                          → Clear the screen
       
     {GREEN}Module Management:{RESET}
-      {BOLD}list-modules{RESET}                   → List all available modules
+      {BOLD}list{RESET}                           → List all available modules
       {BOLD}use <module name>{RESET}              → Select a module (changes prompt)
       {BOLD}run{RESET}                            → Run the currently selected module
       {BOLD}run <module name>{RESET}              → Run a specific module
