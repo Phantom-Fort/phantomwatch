@@ -3,13 +3,13 @@ import sys
 from datetime import datetime
 import json
 from loguru import logger
-from dotenv import load_dotenv, set_key
+from dotenv import load_dotenv, set_key, dotenv_values
 from core.output_formatter import OutputFormatter
 import sqlite3
 from config.config import CONFIG
 
 # Load environment variables
-load_dotenv("config/secrets.env")
+load_dotenv(CONFIG.get("ENV_PATH", None))
 
 # Ensure necessary directories exist
 os.makedirs(CONFIG.get("QUARANTINE_DIR", "quarantine"), exist_ok=True)
@@ -81,13 +81,43 @@ def set_api_key(service, api_key):
     OutputFormatter.print_message(f"[+] API key for {service.upper()} set successfully.", "success")
     log_event(f"API key for {service.upper()} updated.", "info")
 
-def get_api_key(service_name):
-    """Retrieve API keys securely from environment variables or config.json."""
-    config = load_config()
-    api_key = os.getenv(f"{service_name.upper()}_API_KEY") or config.get(f"{service_name.upper()}_API_KEY")
-    if not api_key:
-        log_event(f"[!] API key for {service_name} is missing!", "error")
-    return api_key
+# Load secrets.env from the config directory
+dotenv_path = os.path.join(os.path.dirname(__file__), "../config/secrets.env")
+load_dotenv(dotenv_path)  # Ensures environment variables are loaded
+
+def get_api_key(service_names, dotenv_path="config/secrets.env"):
+    """Retrieve API keys securely from environment variables or secrets.env."""
+    
+    # Load API keys from the secrets.env file
+    env_config = dotenv_values(dotenv_path)  # Read .env as dictionary
+
+    # Ensure service_names is a list
+    if isinstance(service_names, str):  
+        service_names = [service_names]  
+
+    api_keys = {}
+
+    for service_name in service_names:
+        if not isinstance(service_name, str):  
+            log_event(f"[!] Invalid API key format for: {service_name}", "error")
+            continue
+
+        env_var = f"{service_name.upper()}_API_KEY"
+
+        # Try getting from environment variables first
+        key = os.getenv(env_var)
+
+        # If not found, try getting from secrets.env
+        if not key:
+            key = env_config.get(env_var)
+
+        if not key:
+            log_event(f"[!] API key for {service_name} is missing!", "error")
+        else:
+            api_keys[service_name] = key
+
+    return api_keys
+
 
 def store_sigma_match(rule_name, description, log_entry, filename="sigma_matches.json"):
     """Stores Sigma match details in a JSON file and logs the event."""

@@ -58,40 +58,45 @@ MODULES = {
     "exploit-finder": exploit_finder.run,
 }
 
-def get_user_inputs(module):
-    """Prompt the user for required inputs based on the module's flags."""
+# Indicate modules with required API keys
+MODULES["siem-analysis"].REQUIRED_API_KEY = "ELASTICSEARCH API"
+MODULES["threat-intel"].REQUIRED_API_KEY = ["VIRUSTOTAL API", "MISP API", "MISP URL", "OTX API"]
+MODULES["yara-scan"].REQUIRED_API_KEY = "HYBRIDANALYSIS API"
+MODULES["malware-analysis"].REQUIRED_API_KEY = ["ANYRUN API", "HYBRIDANALYSIS API"]
+MODULES["osint-recon"].REQUIRED_API_KEY = ["SHODAN API", "HUNTER API"]
+MODULES["websec-scanner"].REQUIRED_API_KEY = "SECURITYTRAILS API"
+
+def get_required_flag(module):
+    """Retrieve the required flag for a module and prompt the user for input."""
     if module not in MODULE_FLAGS:
         OutputFormatter.print_message(f"[-] Error: Unknown module '{module}'.", "error")
-        return None  # Exit if module is invalid
+        return None
 
     flags = MODULE_FLAGS[module]
-    user_inputs = {}
 
-    # If multiple flags exist, prompt the user to select one
     if len(flags) > 1:
         print(f"[INFO] The '{module}' module has multiple flag options:")
         for i, flag in enumerate(flags, start=1):
             print(f"  {i}. {flag}")
 
-        flag_choice = input("Enter the number corresponding to the flag you want to use: ").strip()
         try:
-            flag_choice = int(flag_choice)
+            flag_choice = int(input("Enter the number corresponding to the flag you want to use: ").strip())
             if 1 <= flag_choice <= len(flags):
                 selected_flag = flags[flag_choice - 1]
             else:
                 OutputFormatter.print_message(f"[-] Error: Invalid choice '{flag_choice}' for module '{module}'.", "error")
                 return None
         except ValueError:
-            OutputFormatter.print_message(f"[-] Error: Please enter a valid number for module '{module}'.", "error")
+            OutputFormatter.print_message("[-] Error: Please enter a valid number.", "error")
             return None
     else:
-        selected_flag = flags[0]  # Use the only available flag
+        selected_flag = flags[0]
 
-    user_inputs[selected_flag] = input(f"Enter the {selected_flag}: ").strip()
-    return user_inputs  # Return user input as a dictionary
+    user_input = input(f"Enter the {selected_flag}: ").strip()
+    return {selected_flag: user_input}
 
 def execute_module(module):
-    """Executes the specified module after collecting necessary inputs."""
+    """Executes the selected module after checking API key and collecting required flag input."""
 
     if module not in MODULES:
         OutputFormatter.print_message("[-] Invalid module specified. Use 'list-modules' to list available modules.", "error")
@@ -100,37 +105,40 @@ def execute_module(module):
 
     OutputFormatter.print_message(f"[+] Running module: {module}\n", "info")
 
-    # Check if the module requires an API key
+    # Step 1: Check if the module requires an API key
     required_api_key = getattr(MODULES[module], "REQUIRED_API_KEY", None)
 
     if required_api_key:
+        if isinstance(required_api_key, str):
+            required_api_key = [required_api_key]  # Convert to list
+
         api_keys = get_api_key(required_api_key)
 
-        if required_api_key not in api_keys or not api_keys[required_api_key].strip():
-            OutputFormatter.print_message(f"[-] Error: The module '{module}' requires the API key '{required_api_key}' to be set.", "error")
-            
-            set_key = input(f"Do you want to set the API key for '{required_api_key}' now? (y/n): ").strip().lower()
-            if set_key == "y":
-                OutputFormatter.print_message(f"Use the command 'set-api {required_api_key} <your_api_key>' to set the API key.", "info")
-            else:
-                OutputFormatter.print_message("[-] API key not set. Module execution aborted.", "error")
-            return
+        for key in required_api_key:
+            if key not in api_keys or not api_keys[key] or not api_keys[key].strip():
+                return
 
-    # Collect user inputs based on the module's required flags
-    user_inputs = get_user_inputs(module)
+        OutputFormatter.print_message(f"[INFO] API keys for '{module}' are set.\n", "info")
+    else:
+        OutputFormatter.print_message(f"[INFO] '{module}' is accessible offline.\n", "info")
+
+    # Step 2: Retrieve required flag input
+    user_inputs = get_required_flag(module)
     if not user_inputs:
-        return  # Abort execution if missing inputt
+        return  # Abort execution if input is missing
 
-    # Execute the module safely
+    # Step 3: Execute the module
     try:
-        MODULES[module](**user_inputs)
+        MODULES[module](list(user_inputs.values())[0])
         OutputFormatter.print_message(f"[+] Module '{module}' executed successfully.", "success")
         log_event(f"Successfully executed module: {module}", "success")
-    except AttributeError:
-        OutputFormatter.print_message(f"[-] Error: Module '{module}' execution failed.", "error")
-        log_event(f"Module '{module}' is missing a 'run' function.", "error")
+    except TypeError as e:
+        OutputFormatter.print_message(f"[-] Error: Unexpected arguments passed to module '{module}'.", "error")
+        log_event(f"Module execution error: {str(e)}", "error")
     except Exception as e:
-        log_event(f"Error executing module '{module}': {str(e)}", "error")
+        OutputFormatter.print_message(f"[-] Error: Module '{module}' execution failed due to an exception.", "error")
+        log_event(f"Execution failure: {str(e)}", "error")
+
 
 def list_modules():
     """Lists available modules."""
@@ -159,7 +167,7 @@ def interactive_shell():
     selected_module = None  # Tracks the currently selected module
 
     while True:
-        try:
+        try:    
             prompt = f"phantomwatch{f'({selected_module})' if selected_module else ''}> "
             cmd = input(prompt).strip()
             
