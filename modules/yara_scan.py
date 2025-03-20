@@ -1,4 +1,4 @@
-import subprocess
+import yara
 import os
 import json
 import requests
@@ -14,48 +14,65 @@ from .utils import log_event, init_db, store_result, save_output
 init_db()
 
 # Get paths from config
-YARA_RULES_DIR = CONFIG.get("SIGMA_RULES_PATH", "rules/yara/")
-SAMPLE_FILE = CONFIG.get("SAMPLE_FILE", "samples/malware.exe")
+YARA_RULES_DIR = CONFIG.get("YARA_RULES_PATH", "rules/yara/")
+SAMPLE_FILE = CONFIG.get("MALWARE_SAMPLE", "samples/malware.exe")
 SCAN_OUTPUT_FILE = CONFIG.get("THREAT_INTEL_REPORT", "output/yara_scan_results.json")
 HYBRID_ANALYSIS_API_KEY = CONFIG.get("HYBRIDANALYSIS_API_KEY", "")
 
+def load_yara_rules():
+    """Loads all YARA rules from the specified directory."""
+    rule_files = {}
+    
+    # Collect all .yar or .yara files
+    for root, _, files in os.walk(YARA_RULES_DIR):
+        for file in files:
+            if file.endswith(".yar") or file.endswith(".yara"):
+                rule_path = os.path.join(root, file)
+                rule_files[file] = rule_path
+
+    if not rule_files:
+        log_event("No YARA rules found!", "error")
+        return None
+
+    try:
+        return yara.compile(filepaths=rule_files)
+    except yara.SyntaxError as e:
+        log_event(f"YARA syntax error: {e}", "error")
+        return None
+    except yara.Error as e:
+        log_event(f"Failed to compile YARA rules: {e}", "error")
+        return None
+
 
 def scan_file_with_yara(file_path):
-    """Scan a file using the YARA binary and return results."""
+    """Scan a file using YARA rules and return results."""
     if not os.path.exists(file_path):
         log_event(f"File {file_path} not found!", "error")
         return []
 
+    rules = load_yara_rules()
+    if not rules:
+        return []
+
     try:
-        result = subprocess.run(
-            ["yara", "-r", YARA_RULES_DIR, file_path],
-            capture_output=True,
-            text=True
-        )
-
-        if result.returncode == 0 and result.stdout:
-            matches = result.stdout.strip().split("\n")
-            scan_results = []
-            for match in matches:
-                rule_name = match.split(" ")[0]
-                result_data = {
-                    "file": file_path,
-                    "rule_name": rule_name,
-                    "timestamp": datetime.now().isoformat(),
-                    "severity": "High" if "critical" in rule_name.lower() else "Medium"
-                }
-                scan_results.append(result_data)
-                store_result("yara_scan", result_data["file"], result_data["rule_name"])
-                log_event(f"[MATCH] {rule_name} detected in {file_path} (Severity: {result_data['severity']})")
-
-            return scan_results
+        matches = rules.match(file_path)
+        scan_results = []
         
-        elif result.returncode != 0:
-            log_event(f"YARA scan failed: {result.stderr}", "error")
-            return []
+        for match in matches:
+            result_data = {
+                "file": file_path,
+                "rule_name": match.rule,
+                "timestamp": datetime.now().isoformat(),
+                "severity": "High" if "critical" in match.rule.lower() else "Medium"
+            }
+            scan_results.append(result_data)
+            store_result("yara_scan", result_data["file"], result_data["rule_name"])
+            log_event(f"[MATCH] {match.rule} detected in {file_path} (Severity: {result_data['severity']})")
 
-    except Exception as e:
-        log_event(f"Failed to execute YARA: {e}", "error")
+        return scan_results
+
+    except yara.Error as e:
+        log_event(f"YARA scanning error: {e}", "error")
         return []
 
 
@@ -78,19 +95,20 @@ def fetch_hybrid_analysis(file_hash):
         log_event(f"HybridAnalysis API request failed: {response.status_code} - {response.text}", "error")
         return None
 
+
 def calculate_file_hash(file_path):
     """Calculates SHA256 hash of a file."""
     try:
         with open(file_path, "rb") as f:
             return hashlib.sha256(f.read()).hexdigest()
     except Exception as e:
-        print(f"[-] Error calculating file hash: {e}")
+        log_event(f"Error calculating file hash: {e}", "error")
         return None
+
 
 def run(sample_file):
     """Runs YARA scan and fetches threat intelligence if necessary."""
-    
-    print(f"[+] Scanning file with YARA: {sample_file}")
+    log_event(f"Starting YARA scan on: {sample_file}", "info")
     
     try:
         scan_results = scan_file_with_yara(sample_file)
@@ -101,7 +119,7 @@ def run(sample_file):
             # Calculate file hash for threat intelligence
             file_hash = calculate_file_hash(sample_file)
             if file_hash:
-                print(f"[+] Fetching HybridAnalysis threat intelligence for hash: {file_hash}")
+                log_event(f"Fetching HybridAnalysis threat intelligence for hash: {file_hash}", "info")
                 intel_data = fetch_hybrid_analysis(file_hash)
                 if intel_data:
                     save_output(intel_data, "results/hybrid_analysis_results.json")
@@ -110,7 +128,8 @@ def run(sample_file):
             log_event("No YARA matches found.", "warning")
 
     except Exception as e:
-        print(f"[-] Error running YARA scan: {e}")
+        log_event(f"Error running YARA scan: {e}", "error")
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -119,4 +138,3 @@ if __name__ == "__main__":
 
     sample_file = sys.argv[1]
     run(sample_file)
-

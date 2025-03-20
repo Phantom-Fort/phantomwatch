@@ -1,0 +1,19 @@
+name: YARA CI
+
+on: [push, pull_request]
+
+jobs:
+  yara-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install YARA and YaraCI
+        run: |
+          sudo apt update
+          sudo apt install -y yara
+          pip install yaraci
+
+      - name: Validate YARA Rules
+        run: yaraci validate rules/

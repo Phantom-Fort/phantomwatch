@@ -20,6 +20,7 @@ elasticsearch
 pyyaml
 shodan
 OTXv2
+hashlib
 
 # Utility and Performance
 tqdm
