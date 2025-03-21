@@ -31,7 +31,6 @@ CONFIG = {
     "SIGMA_MATCHES_REPORT": os.path.join(BASE_DIR, "..", "output", "sigma_matches.json"),
     "QUARANTINE_DIR": os.path.join(BASE_DIR, "..", "quarantine"),
     "FORENSIC REPORT": os.path.join(BASE_DIR, "..", "result", "forensics_report.json"),
-    "MALWARE_SAMPLE": os.path.join(BASE_DIR, "..", "samples"),
     "MALWARE REPORT": os.path.join(BASE_DIR, "..", "result", "malware_analysis.json"),
     "HYBRIDANALYSIS_API_KEY": os.getenv("HYBRIDANALYSIS", "your_api_key_here"),
     "ANYRUN_API_KEY": os.getenv("ANYRUN", "your_api_key_here"),
