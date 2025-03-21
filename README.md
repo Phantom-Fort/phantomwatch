@@ -46,16 +46,16 @@ Ensure your system has the following installed:
 
 ## Usage
 
-### Listing Available Modules
+### Initiate the interactive shell
 
 ```sh
 phantomwatch
 ```
 
-### Running a Module
+### selecting a Modulen (phantomwatch>)
 
 ```sh
-phantomwatch run -m <module-name>
+use <module-name>
 ```
 
 ## Configuration
