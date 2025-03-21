@@ -12,7 +12,8 @@ from sigma.pipelines.elasticsearch import ecs_windows
 from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from .utils import log_event, init_db, store_siem_results, save_output, store_result
+from core.output_formatter import OutputFormatter
+from .utils import init_db, store_siem_results, save_output, store_result
 from config.config import CONFIG
 
 # Initialize Database
@@ -29,7 +30,7 @@ es = Elasticsearch([ELASTICSEARCH_HOST])
 # Load Sigma rules
 def load_sigma_rules(rule_file):
     if not os.path.exists(rule_file):
-        log_event(f"[ERROR] Sigma rule file not found: {rule_file}", "error")
+        OutputFormatter.log_message(f"[ERROR] Sigma rule file not found: {rule_file}", "error")
         return []
     try:
         with open(rule_file, "r") as f:
@@ -37,7 +38,7 @@ def load_sigma_rules(rule_file):
             backend = LuceneBackend(SigmaRule())
             return [backend.convert(rule) for rule in parser.rules]
     except yaml.YAMLError as e:
-        log_event(f"[ERROR] Error parsing Sigma rules YAML: {e}", "error")
+        OutputFormatter.log_message(f"[ERROR] Error parsing Sigma rules YAML: {e}", "error")
         return []
 
 # Search logs in Elasticsearch using Sigma rules
@@ -99,7 +100,7 @@ def correlate_events():
     # Output results to a file
     save_output("correlation_results.json", correlation_results)
     
-    log_event(f"[INFO] Correlated {len(correlation_results)} events.", "info")
+    OutputFormatter.log_message(f"[INFO] Correlated {len(correlation_results)} events.", "info")
     return correlation_results
 
 # Main execution function
@@ -114,7 +115,7 @@ def analyze_siem_logs():
         else:
             print("[INFO] No threats detected in logs.")
     except Exception as e:
-        log_event(f"[ERROR] Log analysis failed {str(e)}", "error")
+        OutputFormatter.log_message(f"[ERROR] Log analysis failed {str(e)}", "error")
 
 def run(log_file):
     """Runs SIEM log analysis on the given log file."""
@@ -127,7 +128,7 @@ def run(log_file):
 
     try:
         analyze_siem_logs(log_file)
-        log_event(f"SIEM log analysis completed for {log_file}", "info")
+        OutputFormatter.log_message(f"SIEM log analysis completed for {log_file}", "info")
         store_result("siem_analysis", log_file, "analysis_completed")
 
     except Exception as e:

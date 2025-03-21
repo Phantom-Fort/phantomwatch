@@ -19,15 +19,6 @@ os.makedirs(os.path.dirname(CONFIG.get("LOG_FILE", "../logs/phantomwatch.log")),
 logger.remove()
 logger.add(CONFIG.get("LOG_FILE", "../logs/phantomwatch.log"), rotation="10MB", level="INFO", format="{time} - {level} - {message}")
 
-def log_event(message, level="info"):
-    """Log events to the log file."""
-    level_map = {
-        "info": logger.info,
-        "warning": logger.warning,
-        "error": logger.error
-    }
-    level_map.get(level, logger.info)(message)
-
 def log_incident(action, target, status):
     """Log an incident response action."""
     conn = sqlite3.connect(CONFIG.get("DATABASE_PATH", "phantomwatch.db"))
@@ -38,7 +29,7 @@ def log_incident(action, target, status):
     )
     conn.commit()
     conn.close()
-    log_event(f"[*] Incident logged: {action} on {target} (Status: {status})", "info")
+    OutputFormatter.log_message(f"[*] Incident logged: {action} on {target} (Status: {status})", "info")
 
 def fetch_threat_intel(ioc_type, value):
     """Fetch threat intelligence from the database."""
@@ -54,13 +45,13 @@ def save_output(data, file_path):
         data = {"results": data}  # Wrap list in a dictionary for JSON compatibility
     with open(file_path, "w") as file:
         json.dump(data, file, indent=4)
-    log_event(f"[*] Output saved to {file_path}")
+    OutputFormatter.log_message(f"[*] Output saved to {file_path}")
 
 def load_config():
     """Load non-sensitive configuration settings from config.json."""
     config_path = os.path.join(os.path.dirname(__file__), "config", "config.json")
     if not os.path.exists(config_path):
-        log_event("[!] Configuration file missing!", "error")
+        OutputFormatter.log_message("[!] Configuration file missing!", "error")
         return {}
 
     with open(config_path, "r") as config_file:
@@ -71,7 +62,7 @@ def save_config(updated_config):
     config_path = os.path.join(os.path.dirname(__file__), "config", "config.json")
     with open(config_path, "w") as config_file:
         json.dump(updated_config, config_file, indent=4)
-    log_event("[*] Configuration updated successfully.", "info")
+    OutputFormatter.log_message("[*] Configuration updated successfully.", "info")
 
 def set_api_key(service, api_key):
     """Sets an API key in the .env file."""
@@ -79,7 +70,7 @@ def set_api_key(service, api_key):
     
     set_key(env_path, service.upper(), api_key)
     OutputFormatter.print_message(f"[+] API key for {service.upper()} set successfully.", "success")
-    log_event(f"API key for {service.upper()} updated.", "info")
+    OutputFormatter.log_message(f"API key for {service.upper()} updated.", "info")
 
 # Load secrets.env from the config directory
 dotenv_path = os.path.join(os.path.dirname(__file__), "../config/secrets.env")
@@ -99,7 +90,7 @@ def get_api_key(service_names, dotenv_path="config/secrets.env"):
 
     for service_name in service_names:
         if not isinstance(service_name, str):  
-            log_event(f"[!] Invalid API key format for: {service_name}", "error")
+            OutputFormatter.log_message(f"[!] Invalid API key format for: {service_name}", "error")
             continue
 
         env_var = f"{service_name.upper()}_API_KEY"
@@ -112,7 +103,7 @@ def get_api_key(service_names, dotenv_path="config/secrets.env"):
             key = env_config.get(env_var)
 
         if not key:
-            log_event(f"[!] API key for {service_name} is missing!", "error")
+            OutputFormatter.log_message(f"[!] API key for {service_name} is missing!", "error")
         else:
             api_keys[service_name] = key
 
@@ -145,7 +136,7 @@ def store_sigma_match(rule_name, description, log_entry, filename="sigma_matches
         json.dump(data, f, indent=4)
 
     # Log the event
-    log_event(f"[*] Sigma match stored: Rule - {rule_name}, Description - {description}", "info")
+    OutputFormatter.log_message(f"[*] Sigma match stored: Rule - {rule_name}, Description - {description}", "info")
 
 
 def init_db():
@@ -208,7 +199,7 @@ def init_db():
 
     conn.commit()
     conn.close()
-    log_event("Database initialized successfully.", "info")
+    OutputFormatter.log_message("Database initialized successfully.", "info")
 
 def store_result(table, log, rule_name, severity="Medium"):
     """Store scan results in the database."""
@@ -220,7 +211,7 @@ def store_result(table, log, rule_name, severity="Medium"):
     )
     conn.commit()
     conn.close()
-    log_event(f"[*] Stored result in {table}: {rule_name} -> {log} (Severity: {severity})", "info")
+    OutputFormatter.log_message(f"[*] Stored result in {table}: {rule_name} -> {log} (Severity: {severity})", "info")
 
 def store_siem_results(table_name, data):
     conn = sqlite3.connect(CONFIG["DATABASE_PATH"])
@@ -248,11 +239,11 @@ def check_requirements():
     missing_keys = [key for key in required_keys if not get_api_key(key)]
 
     if missing_keys:
-        log_event(f"[!] Missing API keys: {', '.join(missing_keys)}", "error")
+        OutputFormatter.log_message(f"[!] Missing API keys: {', '.join(missing_keys)}", "error")
         exit(1)
 
     if not os.path.exists(CONFIG["DATABASE_PATH"]):
-        log_event("[!] Database not found. Initializing...", "warning")
+        OutputFormatter.log_message("[!] Database not found. Initializing...", "warning")
         init_db()
 
 if __name__ == "__main__":
@@ -267,4 +258,4 @@ if __name__ == "__main__":
         set_api_key(service_name, api_key)
     else:
         check_requirements()
-        log_event("[*] All checks passed. PhantomWatch is ready to run.", "info")
+        OutputFormatter.log_message("[*] All checks passed. PhantomWatch is ready to run.", "info")

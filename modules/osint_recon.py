@@ -6,13 +6,14 @@ import os
 import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from core.output_formatter import OutputFormatter
 from config.config import CONFIG
-from .utils import log_event, store_result, save_output
+from .utils import store_result, save_output
 
 def shodan_scan(target):
     api_key = CONFIG.get("SHODAN_API_KEY")
     if not api_key:
-        log_event("Shodan API key not configured!", "error")
+        OutputFormatter.log_message("Shodan API key not configured!", "error")
         return None
     
     try:
@@ -21,13 +22,13 @@ def shodan_scan(target):
         store_result("osint_recon", target, "shodan_scan")
         return result
     except shodan.APIError as e:
-        log_event(f"Shodan API error: {e}", "error")
+        OutputFormatter.log_message(f"Shodan API error: {e}", "error")
         return None
 
 def hunter_email_lookup(domain):
     api_key = CONFIG.get("HUNTER_API_KEY")
     if not api_key:
-        log_event("Hunter.io API key not configured!", "error")
+        OutputFormatter.log_message("Hunter.io API key not configured!", "error")
         return None
     
     url = f"https://api.hunter.io/v2/domain-search?domain={domain}&api_key={api_key}"
@@ -36,7 +37,7 @@ def hunter_email_lookup(domain):
         store_result("osint_recon", domain, "hunter_email_lookup")
         return response.json()
     else:
-        log_event(f"Hunter.io request failed: {response.text}", "error")
+        OutputFormatter.log_message(f"Hunter.io request failed: {response.text}", "error")
         return None
 
 def run_wiggle_scan(target):
@@ -46,14 +47,14 @@ def run_wiggle_scan(target):
             store_result("osint_recon", target, "wiggle_scan")
             return result.stdout.strip()
         else:
-            log_event("Wiggle scan failed", "error")
+            OutputFormatter.log_message("Wiggle scan failed", "error")
             return None
     except Exception as e:
-        log_event(f"Error running wiggle: {e}", "error")
+        OutputFormatter.log_message(f"Error running wiggle: {e}", "error")
         return None
 
 def osint_recon(target):
-    log_event(f"Starting OSINT recon on {target}")
+    OutputFormatter.log_message(f"Starting OSINT recon on {target}")
     
     shodan_data = shodan_scan(target)
     hunter_data = hunter_email_lookup(target)
@@ -67,7 +68,7 @@ def osint_recon(target):
     
     save_output(f"osint_{target}.json", results)
     
-    log_event(f"OSINT Recon completed. Results saved to output/osint_{target}.json")
+    OutputFormatter.log_message(f"OSINT Recon completed. Results saved to output/osint_{target}.json")
     store_result ("osint_recon", target, "osint_recon")
     return results
 
@@ -83,7 +84,7 @@ def run(target):
     try:
         results = osint_recon(target) or {}
 
-        log_event(f"OSINT results for {target}: {json.dumps(results, indent=4)}", "info")
+        OutputFormatter.log_message(f"OSINT results for {target}: {json.dumps(results, indent=4)}", "info")
         store_result("osint_recon", target, results)
         save_output("osint_recon_results.json", results)
 

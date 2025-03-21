@@ -7,7 +7,7 @@ from config.config import CONFIG
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from core.output_formatter import OutputFormatter
-from modules.utils import log_event, get_saved_results, get_api_key
+from modules.utils import get_saved_results, get_api_key
 from core.help import display_help
 from modules import (
     incident_response, 
@@ -100,7 +100,7 @@ def execute_module(module):
 
     if module not in MODULES:
         OutputFormatter.print_message("[-] Invalid module specified. Use 'list-modules' to list available modules.", "error")
-        log_event(f"Invalid module specified: {module}", "warning")
+        OutputFormatter.log_message(f"Invalid module specified: {module}", "warning")
         return
 
     OutputFormatter.print_message(f"[+] Running module: {module}\n", "info")
@@ -125,7 +125,7 @@ def execute_module(module):
     if not user_inputs:
         return  # Abort execution if input is missing
 
-    print(f"[DEBUG] user_inputs: {user_inputs}")  # Debugging print
+    print(f"[DEBUG] Input: {user_inputs}")  # Debugging print
 
     # Step 3: Execute the module
     try:
@@ -133,13 +133,13 @@ def execute_module(module):
         print(f"[DEBUG] Passing argument to {module}: {arg_value}")  # Debugging print
         MODULES[module](arg_value)
         OutputFormatter.print_message(f"[+] Module '{module}' executed successfully.", "success")
-        log_event(f"Successfully executed module: {module}", "success")
+        OutputFormatter.log_message(f"Successfully executed module: {module}", "success")
     except TypeError as e:
         OutputFormatter.print_message(f"[-] Error: Unexpected arguments passed to module '{module}'.", "error")
-        log_event(f"Module execution error: {str(e)}", "error")
+        OutputFormatter.log_message(f"Module execution error: {str(e)}", "error")
     except Exception as e:
         OutputFormatter.print_message(f"[-] Error: Module '{module}' execution failed due to an exception.", "error")
-        log_event(f"Execution failure: {str(e)}", "error")
+        OutputFormatter.log_message(f"Execution failure: {str(e)}", "error")
 
 
 def list_modules():
@@ -176,7 +176,7 @@ def interactive_shell():
             if not cmd:
                 continue  # Ignore empty commands
 
-            log_event(f"Command entered: {cmd}", "info")
+            OutputFormatter.log_message(f"Command entered: {cmd}", "info")
 
             if cmd.lower() in ["exit", "quit"]:
                 OutputFormatter.print_message("[+] Exiting PhantomWatch CLI...", "info")
@@ -258,7 +258,7 @@ def interactive_shell():
             OutputFormatter.print_message("\n[+] Exiting PhantomWatch CLI...", "info")
             break
         except Exception as e:
-            log_event(f"Error: {e}", "error")
+            OutputFormatter.log_message(f"Error: {e}", "error")
             OutputFormatter.print_message("[-] An error occurred. Check logs for details.", "error")
 
 def set_api_key(service, api_key):
@@ -267,7 +267,7 @@ def set_api_key(service, api_key):
     
     set_key(env_path, service.upper(), api_key)
     OutputFormatter.print_message(f"[+] API key for {service.upper()} set successfully.", "success")
-    log_event(f"API key for {service.upper()} updated.")
+    OutputFormatter.log_message(f"API key for {service.upper()} updated.")
 
 def view_api_keys():
     """Lists the configured API keys without revealing sensitive values."""

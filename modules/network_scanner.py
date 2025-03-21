@@ -4,7 +4,10 @@ import re
 import os
 import sys
 from datetime import datetime
-from .utils import store_result, log_event, save_output
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from .utils import store_result, save_output
+from core.output_formatter import OutputFormatter
 
 def run_masscan(target, ports="1-65535", rate="10000"):
     """Runs Masscan for fast port scanning."""
@@ -14,7 +17,7 @@ def run_masscan(target, ports="1-65535", rate="10000"):
         ], capture_output=True, text=True, check=True)
         return json.loads(result.stdout) if result.stdout else []
     except Exception as e:
-        log_event(f"Masscan error: {str(e)}", "error")
+        OutputFormatter.log_message(f"Masscan error: {str(e)}", "error")
         return {"error": str(e)}
 
 def run_nmap(target, ports):
@@ -25,7 +28,7 @@ def run_nmap(target, ports):
         ], capture_output=True, text=True, check=True)
         return parse_nmap_output(result.stdout)
     except Exception as e:
-        log_event(f"Nmap error: {str(e)}", "error")
+        OutputFormatter.log_message(f"Nmap error: {str(e)}", "error")
         return {"error": str(e)}
 
 def parse_nmap_output(nmap_output):
@@ -67,7 +70,7 @@ def run(target_ip):
     try:
         results = scan_network(target_ip) or {}
 
-        log_event(f"Scan results for {target_ip}: {json.dumps(results, indent=4)}", "info")
+        OutputFormatter.log_message(f"Scan results for {target_ip}: {json.dumps(results, indent=4)}", "info")
         store_result("network_scanner", target_ip, results)
         save_output("network_scan_results.json", results)
 

@@ -52,10 +52,16 @@ Ensure your system has the following installed:
 phantomwatch
 ```
 
-### selecting a Modulen (phantomwatch>)
+### selecting a Module (phantomwatch>)
 
 ```sh
 use <module-name>
+```
+
+### sList available Modules (phantomwatch>)
+
+```sh
+list
 ```
 
 ## Configuration

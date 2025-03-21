@@ -7,7 +7,8 @@ from datetime import datetime
 from OTXv2 import OTXv2, IndicatorTypes
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from .utils import get_api_key, log_event, init_db, store_result, save_output
+from core.output_formatter import OutputFormatter
+from .utils import get_api_key, init_db, store_result, save_output
 from config.config import CONFIG  # Import config file
 
 # Database setup
@@ -29,7 +30,7 @@ def fetch_threat_intel(ioc_type, value):
                 results["VirusTotal"] = response.json()
                 store_result(ioc_type, value, "VirusTotal", results["VirusTotal"])
             except requests.exceptions.RequestException as e:
-                log_event(f"[ERROR] VirusTotal API request failed: {e}", "error")
+                OutputFormatter.log_message(f"[ERROR] VirusTotal API request failed: {e}", "error")
 
         # MISP API
         MISP_API_KEY = get_api_key("MISP_API_KEY")
@@ -43,7 +44,7 @@ def fetch_threat_intel(ioc_type, value):
                 results["MISP"] = response.json()
                 store_result(ioc_type, value, "MISP", results["MISP"])
             except requests.exceptions.RequestException as e:
-                log_event(f"[ERROR] MISP API request failed: {e}")
+                OutputFormatter.log_message(f"[ERROR] MISP API request failed: {e}")
 
         # OTX API
         OTX_API_KEY = get_api_key("OTX_API_KEY")
@@ -57,13 +58,13 @@ def fetch_threat_intel(ioc_type, value):
                 elif ioc_type.upper() == "HASH":
                     otx_results = otx.get_indicator_details_full(IndicatorTypes.FILE_HASH_MD5, value)
                 else:
-                    log_event(f"[ERROR] Unsupported IOC type: {ioc_type}")
+                    OutputFormatter.log_message(f"[ERROR] Unsupported IOC type: {ioc_type}")
                     return results
 
                 results["OTX"] = otx_results
                 store_result(ioc_type, value, "OTX", results["OTX"])
             except Exception as e:
-                log_event(f"[ERROR] OTX API query failed: {e}")
+                OutputFormatter.log_message(f"[ERROR] OTX API query failed: {e}")
 
         return results
 

@@ -9,7 +9,8 @@ import sqlite3
 from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from .utils import log_event, init_db, store_result, log_incident, fetch_threat_intel, save_output
+from core.output_formatter import OutputFormatter
+from .utils import init_db, store_result, log_incident, fetch_threat_intel, save_output
 from config.config import CONFIG  # Import config
 
 # Database setup
