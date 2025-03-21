@@ -15,7 +15,6 @@ init_db()
 
 # Get paths from config
 YARA_RULES_DIR = CONFIG.get("YARA_RULES_PATH", "rules/yara/")
-SAMPLE_FILE = CONFIG.get("MALWARE_SAMPLE", "samples/malware.exe")
 SCAN_OUTPUT_FILE = CONFIG.get("THREAT_INTEL_REPORT", "output/yara_scan_results.json")
 HYBRID_ANALYSIS_API_KEY = CONFIG.get("HYBRIDANALYSIS_API_KEY", "")
 
