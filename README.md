@@ -21,6 +21,11 @@ Ensure your system has the following installed:
 - Python 3
 - pip (Python package manager)
 - SQLite3
+- Searchsploit
+- Masscan
+- Nmap
+- autopsy
+- volatility
 
 ### Steps
 

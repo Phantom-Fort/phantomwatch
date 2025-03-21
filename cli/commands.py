@@ -203,7 +203,9 @@ def interactive_shell():
                             break
                         for line in lines:
                             print(line, end="")
-                        input("\nPress Enter to continue...")
+                        user_input = input("\nPress Enter to continue or type 'q' to quit: ").strip().lower()
+                        if user_input == 'q':
+                            break
 
             elif cmd.lower() == "reports":
                 if selected_module:
