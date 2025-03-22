@@ -10,11 +10,24 @@ from sigma.backends.elasticsearch import LuceneBackend
 from sigma.rule import SigmaRule
 from sigma.pipelines.elasticsearch import ecs_windows
 from datetime import datetime
+from loguru import logger
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from core.output_formatter import OutputFormatter
 from .utils import init_db, store_siem_results, save_output, store_result
 from config.config import CONFIG
+
+logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+
+def log_message(message, msg_type="info"):
+    """Logs messages using Loguru instead of print statements."""
+    if msg_type == "success":
+        logger.success(message)
+    elif msg_type == "error":
+        logger.error(message)
+    elif msg_type == "warning":
+        logger.warning(message)
+    else:
+        logger.info(message)
 
 # Initialize Database
 init_db()
@@ -30,7 +43,7 @@ es = Elasticsearch([ELASTICSEARCH_HOST])
 # Load Sigma rules
 def load_sigma_rules(rule_file):
     if not os.path.exists(rule_file):
-        OutputFormatter.log_message(f"[ERROR] Sigma rule file not found: {rule_file}", "error")
+        log_message(f"[ERROR] Sigma rule file not found: {rule_file}", "error")
         return []
     try:
         with open(rule_file, "r") as f:
@@ -38,7 +51,7 @@ def load_sigma_rules(rule_file):
             backend = LuceneBackend(SigmaRule())
             return [backend.convert(rule) for rule in parser.rules]
     except yaml.YAMLError as e:
-        OutputFormatter.log_message(f"[ERROR] Error parsing Sigma rules YAML: {e}", "error")
+        log_message(f"[ERROR] Error parsing Sigma rules YAML: {e}", "error")
         return []
 
 # Search logs in Elasticsearch using Sigma rules
@@ -100,7 +113,7 @@ def correlate_events():
     # Output results to a file
     save_output("correlation_results.json", correlation_results)
     
-    OutputFormatter.log_message(f"[INFO] Correlated {len(correlation_results)} events.", "info")
+    log_message(f"[INFO] Correlated {len(correlation_results)} events.", "info")
     return correlation_results
 
 # Main execution function
@@ -115,7 +128,7 @@ def analyze_siem_logs():
         else:
             print("[INFO] No threats detected in logs.")
     except Exception as e:
-        OutputFormatter.log_message(f"[ERROR] Log analysis failed {str(e)}", "error")
+        log_message(f"[ERROR] Log analysis failed {str(e)}", "error")
 
 def run(log_file):
     """Runs SIEM log analysis on the given log file."""
@@ -128,7 +141,7 @@ def run(log_file):
 
     try:
         analyze_siem_logs(log_file)
-        OutputFormatter.log_message(f"SIEM log analysis completed for {log_file}", "info")
+        log_message(f"SIEM log analysis completed for {log_file}", "info")
         store_result("siem_analysis", log_file, "analysis_completed")
 
     except Exception as e:

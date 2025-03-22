@@ -7,11 +7,13 @@ import subprocess
 import shutil
 import sqlite3
 from datetime import datetime
+from loguru import logger
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from core.output_formatter import OutputFormatter
-from .utils import init_db, store_result, log_incident, fetch_threat_intel, save_output
+from .utils import init_db, store_result, log_incident
 from config.config import CONFIG  # Import config
+
+logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
 
 # Database setup
 init_db()

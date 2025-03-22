@@ -4,6 +4,7 @@ import sys
 import readline
 from dotenv import load_dotenv, dotenv_values, set_key
 from config.config import CONFIG
+from loguru import logger
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from core.output_formatter import OutputFormatter
@@ -21,6 +22,19 @@ from modules import (
     network_scanner, 
     exploit_finder
 )
+
+logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+
+def log_message(message, msg_type="info"):
+    """Logs messages using Loguru instead of print statements."""
+    if msg_type == "success":
+        logger.success(message)
+    elif msg_type == "error":
+        logger.error(message)
+    elif msg_type == "warning":
+        logger.warning(message)
+    else:
+        logger.info(message)
 
 # Load environment variables from .env
 load_dotenv()
@@ -100,7 +114,7 @@ def execute_module(module):
 
     if module not in MODULES:
         OutputFormatter.print_message("[-] Invalid module specified. Use 'list-modules' to list available modules.", "error")
-        OutputFormatter.log_message(f"Invalid module specified: {module}", "warning")
+        log_message(f"Invalid module specified: {module}", "warning")
         return
 
     OutputFormatter.print_message(f"[+] Running module: {module}\n", "info")
@@ -133,13 +147,13 @@ def execute_module(module):
         print(f"[DEBUG] Passing argument to {module}: {arg_value}")  # Debugging print
         MODULES[module](arg_value)
         OutputFormatter.print_message(f"[+] Module '{module}' executed successfully.", "success")
-        OutputFormatter.log_message(f"Successfully executed module: {module}", "success")
+        log_message(f"Successfully executed module: {module}", "success")
     except TypeError as e:
         OutputFormatter.print_message(f"[-] Error: Unexpected arguments passed to module '{module}'.", "error")
-        OutputFormatter.log_message(f"Module execution error: {str(e)}", "error")
+        log_message(f"Module execution error: {str(e)}", "error")
     except Exception as e:
         OutputFormatter.print_message(f"[-] Error: Module '{module}' execution failed due to an exception.", "error")
-        OutputFormatter.log_message(f"Execution failure: {str(e)}", "error")
+        log_message(f"Execution failure: {str(e)}", "error")
 
 
 def list_modules():
@@ -176,7 +190,7 @@ def interactive_shell():
             if not cmd:
                 continue  # Ignore empty commands
 
-            OutputFormatter.log_message(f"Command entered: {cmd}", "info")
+            log_message(f"Command entered: {cmd}", "info")
 
             if cmd.lower() in ["exit", "quit"]:
                 OutputFormatter.print_message("[+] Exiting PhantomWatch CLI...", "info")
@@ -260,7 +274,7 @@ def interactive_shell():
             OutputFormatter.print_message("\n[+] Exiting PhantomWatch CLI...", "info")
             break
         except Exception as e:
-            OutputFormatter.log_message(f"Error: {e}", "error")
+            log_message(f"Error: {e}", "error")
             OutputFormatter.print_message("[-] An error occurred. Check logs for details.", "error")
 
 def set_api_key(service, api_key):
@@ -269,7 +283,7 @@ def set_api_key(service, api_key):
     
     set_key(env_path, service.upper(), api_key)
     OutputFormatter.print_message(f"[+] API key for {service.upper()} set successfully.", "success")
-    OutputFormatter.log_message(f"API key for {service.upper()} updated.")
+    log_message(f"API key for {service.upper()} updated.")
 
 def view_api_keys():
     """Lists the configured API keys without revealing sensitive values."""

@@ -8,6 +8,19 @@ from core.output_formatter import OutputFormatter
 import sqlite3
 from config.config import CONFIG
 
+logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+
+def log_message(message, msg_type="info"):
+    """Logs messages using Loguru instead of print statements."""
+    if msg_type == "success":
+        logger.success(message)
+    elif msg_type == "error":
+        logger.error(message)
+    elif msg_type == "warning":
+        logger.warning(message)
+    else:
+        logger.info(message)
+
 # Load environment variables
 load_dotenv(CONFIG.get("ENV_PATH", None))
 
@@ -15,8 +28,6 @@ load_dotenv(CONFIG.get("ENV_PATH", None))
 os.makedirs(CONFIG.get("QUARANTINE_DIR", "quarantine"), exist_ok=True)
 os.makedirs(os.path.dirname(CONFIG.get("LOG_FILE", "../logs/phantomwatch.log")), exist_ok=True)
 
-# Logging Configuration
-logger.remove()
 logger.add(CONFIG.get("LOG_FILE", "../logs/phantomwatch.log"), rotation="10MB", level="INFO", format="{time} - {level} - {message}")
 
 def log_incident(action, target, status):
@@ -29,7 +40,7 @@ def log_incident(action, target, status):
     )
     conn.commit()
     conn.close()
-    OutputFormatter.log_message(f"[*] Incident logged: {action} on {target} (Status: {status})", "info")
+    log_message(f"[*] Incident logged: {action} on {target} (Status: {status})", "info")
 
 def fetch_threat_intel(ioc_type, value):
     """Fetch threat intelligence from the database."""
@@ -45,13 +56,13 @@ def save_output(data, file_path):
         data = {"results": data}  # Wrap list in a dictionary for JSON compatibility
     with open(file_path, "w") as file:
         json.dump(data, file, indent=4)
-    OutputFormatter.log_message(f"[*] Output saved to {file_path}")
+    log_message(f"[*] Output saved to {file_path}")
 
 def load_config():
     """Load non-sensitive configuration settings from config.json."""
     config_path = os.path.join(os.path.dirname(__file__), "config", "config.json")
     if not os.path.exists(config_path):
-        OutputFormatter.log_message("[!] Configuration file missing!", "error")
+        log_message("[!] Configuration file missing!", "error")
         return {}
 
     with open(config_path, "r") as config_file:
@@ -62,7 +73,7 @@ def save_config(updated_config):
     config_path = os.path.join(os.path.dirname(__file__), "config", "config.json")
     with open(config_path, "w") as config_file:
         json.dump(updated_config, config_file, indent=4)
-    OutputFormatter.log_message("[*] Configuration updated successfully.", "info")
+    log_message("[*] Configuration updated successfully.", "info")
 
 def set_api_key(service, api_key):
     """Sets an API key in the .env file."""
@@ -70,7 +81,7 @@ def set_api_key(service, api_key):
     
     set_key(env_path, service.upper(), api_key)
     OutputFormatter.print_message(f"[+] API key for {service.upper()} set successfully.", "success")
-    OutputFormatter.log_message(f"API key for {service.upper()} updated.", "info")
+    log_message(f"API key for {service.upper()} updated.", "info")
 
 # Load secrets.env from the config directory
 dotenv_path = os.path.join(os.path.dirname(__file__), "../config/secrets.env")
@@ -90,7 +101,7 @@ def get_api_key(service_names, dotenv_path="config/secrets.env"):
 
     for service_name in service_names:
         if not isinstance(service_name, str):  
-            OutputFormatter.log_message(f"[!] Invalid API key format for: {service_name}", "error")
+            log_message(f"[!] Invalid API key format for: {service_name}", "error")
             continue
 
         env_var = f"{service_name.upper()}_API_KEY"
@@ -103,7 +114,7 @@ def get_api_key(service_names, dotenv_path="config/secrets.env"):
             key = env_config.get(env_var)
 
         if not key:
-            OutputFormatter.log_message(f"[!] API key for {service_name} is missing!", "error")
+            log_message(f"[!] API key for {service_name} is missing!", "error")
         else:
             api_keys[service_name] = key
 
@@ -136,7 +147,7 @@ def store_sigma_match(rule_name, description, log_entry, filename="sigma_matches
         json.dump(data, f, indent=4)
 
     # Log the event
-    OutputFormatter.log_message(f"[*] Sigma match stored: Rule - {rule_name}, Description - {description}", "info")
+    log_message(f"[*] Sigma match stored: Rule - {rule_name}, Description - {description}", "info")
 
 
 def init_db():
@@ -199,7 +210,7 @@ def init_db():
 
     conn.commit()
     conn.close()
-    OutputFormatter.log_message("Database initialized successfully.", "info")
+    log_message("Database initialized successfully.", "info")
 
 def store_result(table, log, rule_name, severity="Medium"):
     """Store scan results in the database."""
@@ -211,7 +222,7 @@ def store_result(table, log, rule_name, severity="Medium"):
     )
     conn.commit()
     conn.close()
-    OutputFormatter.log_message(f"[*] Stored result in {table}: {rule_name} -> {log} (Severity: {severity})", "info")
+    log_message(f"[*] Stored result in {table}: {rule_name} -> {log} (Severity: {severity})", "info")
 
 def store_siem_results(table_name, data):
     conn = sqlite3.connect(CONFIG["DATABASE_PATH"])
@@ -239,11 +250,11 @@ def check_requirements():
     missing_keys = [key for key in required_keys if not get_api_key(key)]
 
     if missing_keys:
-        OutputFormatter.log_message(f"[!] Missing API keys: {', '.join(missing_keys)}", "error")
+        log_message(f"[!] Missing API keys: {', '.join(missing_keys)}", "error")
         exit(1)
 
     if not os.path.exists(CONFIG["DATABASE_PATH"]):
-        OutputFormatter.log_message("[!] Database not found. Initializing...", "warning")
+        log_message("[!] Database not found. Initializing...", "warning")
         init_db()
 
 if __name__ == "__main__":
@@ -258,4 +269,4 @@ if __name__ == "__main__":
         set_api_key(service_name, api_key)
     else:
         check_requirements()
-        OutputFormatter.log_message("[*] All checks passed. PhantomWatch is ready to run.", "info")
+        log_message("[*] All checks passed. PhantomWatch is ready to run.", "info")

@@ -3,10 +3,10 @@ import os
 import sys
 import json
 from datetime import datetime
+from loguru import logger
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config.config import CONFIG
-from core.output_formatter import OutputFormatter
 from .utils import init_db, store_result, save_output
 
 # Initialize database
@@ -15,11 +15,23 @@ init_db()
 # Paths from config
 ANALYSIS_OUTPUT = CONFIG.get("FORENSIC_REPORT", "../output/forensic_reports.json")
 
+logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+
+def log_message(message, msg_type="info"):
+    """Logs messages using Loguru instead of print statements."""
+    if msg_type == "success":
+        logger.success(message)
+    elif msg_type == "error":
+        logger.error(message)
+    elif msg_type == "warning":
+        logger.warning(message)
+    else:
+        logger.info(message)
 
 def analyze_disk(image_path):
     """Extract files and forensic artifacts from a disk image."""
     if not os.path.exists(image_path):
-        OutputFormatter.log_message(f"Disk image {image_path} not found!", "error")
+        log_message(f"Disk image {image_path} not found!", "error")
         return []
     
     try:
@@ -34,18 +46,18 @@ def analyze_disk(image_path):
             
             for artifact in artifacts:
                 store_result("forensic_disk", artifact["file"], "Extracted from disk image")
-                OutputFormatter.log_message(f"[DISK] Extracted: {artifact['file']}", "info")
+                log_message(f"[DISK] Extracted: {artifact['file']}", "info")
             return artifacts
         
     except Exception as e:
-        OutputFormatter.log_message(f"Disk analysis failed: {e}", "error")
+        log_message(f"Disk analysis failed: {e}", "error")
         return []
 
 
 def analyze_memory(memory_path):
     """Extract forensic artifacts from a memory dump."""
     if not os.path.exists(memory_path):
-        OutputFormatter.log_message(f"Memory dump {memory_path} not found!", "error")
+        log_message(f"Memory dump {memory_path} not found!", "error")
         return []
     
     try:
@@ -60,11 +72,11 @@ def analyze_memory(memory_path):
             
             for artifact in artifacts:
                 store_result("forensic_memory", artifact["process"], "Detected in memory dump")
-                OutputFormatter.log_message(f"[MEMORY] Found process: {artifact['process']}", "info")
+                log_message(f"[MEMORY] Found process: {artifact['process']}", "info")
             return artifacts
         
     except Exception as e:
-        OutputFormatter.log_message(f"Memory analysis failed: {e}", "error")
+        log_message(f"Memory analysis failed: {e}", "error")
         return []
 
 
@@ -72,7 +84,7 @@ def run(file_path):
     """Executes forensic analysis on either a disk image or a memory dump."""
     
     if not file_path:
-        OutputFormatter.log_message("Missing required forensic analysis input.", "error")
+        log_message("Missing required forensic analysis input.", "error")
         return
     
     forensic_results = []
@@ -82,14 +94,14 @@ def run(file_path):
     elif file_path.endswith(".dmp"):  # Memory Dump Analysis
         forensic_results = analyze_memory(file_path)
     else:
-        OutputFormatter.log_message("Invalid file format. Provide a valid disk image (.img) or memory dump (.dmp).", "error")
+        log_message("Invalid file format. Provide a valid disk image (.img) or memory dump (.dmp).", "error")
         return
 
     if forensic_results:
         save_output(forensic_results, ANALYSIS_OUTPUT)
         store_result("forensic_analysis", ANALYSIS_OUTPUT, "Forensic artifacts extracted")
     else:
-        OutputFormatter.log_message("No forensic artifacts found.", "warning")
+        log_message("No forensic artifacts found.", "warning")
 
 if __name__ == "__main__":
     import sys

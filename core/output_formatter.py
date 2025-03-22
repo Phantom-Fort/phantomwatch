@@ -26,6 +26,7 @@ class OutputFormatter:
             return message  # Return plain text if colors are disabled
         color = OutputFormatter.COLORS.get(msg_type, OutputFormatter.COLORS["info"])
         return f"{color}{message}{OutputFormatter.COLORS['reset']}"
+    
     @staticmethod
     def log_message(message, msg_type="info"):
         """Logs messages using Loguru instead of print statements."""

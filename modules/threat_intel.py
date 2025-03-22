@@ -4,12 +4,25 @@ import os
 import re
 import sys
 from datetime import datetime
+from loguru import logger
 from OTXv2 import OTXv2, IndicatorTypes
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from core.output_formatter import OutputFormatter
 from .utils import get_api_key, init_db, store_result, save_output
 from config.config import CONFIG  # Import config file
+
+logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+
+def log_message(message, msg_type="info"):
+    """Logs messages using Loguru instead of print statements."""
+    if msg_type == "success":
+        logger.success(message)
+    elif msg_type == "error":
+        logger.error(message)
+    elif msg_type == "warning":
+        logger.warning(message)
+    else:
+        logger.info(message)
 
 # Database setup
 init_db()
@@ -30,7 +43,7 @@ def fetch_threat_intel(ioc_type, value):
                 results["VirusTotal"] = response.json()
                 store_result(ioc_type, value, "VirusTotal", results["VirusTotal"])
             except requests.exceptions.RequestException as e:
-                OutputFormatter.log_message(f"[ERROR] VirusTotal API request failed: {e}", "error")
+                log_message(f"[ERROR] VirusTotal API request failed: {e}", "error")
 
         # MISP API
         MISP_API_KEY = get_api_key("MISP_API_KEY")
@@ -44,7 +57,7 @@ def fetch_threat_intel(ioc_type, value):
                 results["MISP"] = response.json()
                 store_result(ioc_type, value, "MISP", results["MISP"])
             except requests.exceptions.RequestException as e:
-                OutputFormatter.log_message(f"[ERROR] MISP API request failed: {e}")
+                log_message(f"[ERROR] MISP API request failed: {e}")
 
         # OTX API
         OTX_API_KEY = get_api_key("OTX_API_KEY")
@@ -58,13 +71,13 @@ def fetch_threat_intel(ioc_type, value):
                 elif ioc_type.upper() == "HASH":
                     otx_results = otx.get_indicator_details_full(IndicatorTypes.FILE_HASH_MD5, value)
                 else:
-                    OutputFormatter.log_message(f"[ERROR] Unsupported IOC type: {ioc_type}")
+                    log_message(f"[ERROR] Unsupported IOC type: {ioc_type}")
                     return results
 
                 results["OTX"] = otx_results
                 store_result(ioc_type, value, "OTX", results["OTX"])
             except Exception as e:
-                OutputFormatter.log_message(f"[ERROR] OTX API query failed: {e}")
+                log_message(f"[ERROR] OTX API query failed: {e}")
 
         return results
 

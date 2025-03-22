@@ -4,10 +4,23 @@ import re
 import os
 import sys
 from datetime import datetime
+from loguru import logger
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from .utils import store_result, save_output
-from core.output_formatter import OutputFormatter
+
+logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+
+def log_message(message, msg_type="info"):
+    """Logs messages using Loguru instead of print statements."""
+    if msg_type == "success":
+        logger.success(message)
+    elif msg_type == "error":
+        logger.error(message)
+    elif msg_type == "warning":
+        logger.warning(message)
+    else:
+        logger.info(message)
 
 def run_masscan(target, ports="1-65535", rate="10000"):
     """Runs Masscan for fast port scanning."""
@@ -17,7 +30,7 @@ def run_masscan(target, ports="1-65535", rate="10000"):
         ], capture_output=True, text=True, check=True)
         return json.loads(result.stdout) if result.stdout else []
     except Exception as e:
-        OutputFormatter.log_message(f"Masscan error: {str(e)}", "error")
+        log_message(f"Masscan error: {str(e)}", "error")
         return {"error": str(e)}
 
 def run_nmap(target, ports):
@@ -28,7 +41,7 @@ def run_nmap(target, ports):
         ], capture_output=True, text=True, check=True)
         return parse_nmap_output(result.stdout)
     except Exception as e:
-        OutputFormatter.log_message(f"Nmap error: {str(e)}", "error")
+        log_message(f"Nmap error: {str(e)}", "error")
         return {"error": str(e)}
 
 def parse_nmap_output(nmap_output):
@@ -70,7 +83,7 @@ def run(target_ip):
     try:
         results = scan_network(target_ip) or {}
 
-        OutputFormatter.log_message(f"Scan results for {target_ip}: {json.dumps(results, indent=4)}", "info")
+        log_message(f"Scan results for {target_ip}: {json.dumps(results, indent=4)}", "info")
         store_result("network_scanner", target_ip, results)
         save_output("network_scan_results.json", results)
 
