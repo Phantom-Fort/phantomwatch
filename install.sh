@@ -10,6 +10,12 @@ BIN_PATH="/usr/local/bin/phantomwatch"
 
 echo "[+] Installing PhantomWatch as a system package..."
 
+# Ensure script is run with sudo
+if [[ $EUID -ne 0 ]]; then
+   echo "[-] Please run this script as root (sudo)." 
+   exit 1
+fi
+
 # Install system dependencies
 sudo apt install -y sqlite3 curl wget python3-venv make gcc python3-pip > /dev/null 2>&1
 
