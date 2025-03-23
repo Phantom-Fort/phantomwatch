@@ -95,9 +95,9 @@ EOF
 # Add execution permissions
 chmod +x "$BIN_PATH"
 chown -R $USER:$USER "$INSTALL_DIR"
-touch "$LOG_DIR/phantomwatch.log"
 chown $USER:$USER "$LOG_DIR/phantomwatch.log"
 chmod 644 "$LOG_DIR/phantomwatch.log"
+chmod 644 "$DB_PATH"
 
 
 echo "[+] Installation complete! You can now run PhantomWatch using the command: phantomwatch"

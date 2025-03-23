@@ -12,8 +12,25 @@ json_config_path = os.path.join(os.path.dirname(__file__), "config.json")
 with open(json_config_path, "r") as f:
     json_config = json.load(f)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Define Base Directory
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
+# Ensure required directories exist
+REQUIRED_DIRS = ["database", "logs", "rules", "output", "result", "quarantine"]
+
+for directory in REQUIRED_DIRS:
+    full_path = os.path.join(BASE_DIR, directory)
+    os.makedirs(full_path, exist_ok=True)  # Create if not exists
+
+# Fix permissions (optional, but ensures access)
+for directory in REQUIRED_DIRS:
+    full_path = os.path.join(BASE_DIR, directory)
+    try:
+        os.chmod(full_path, 0o755)  # Read/Write/Execute for owner, Read/Execute for others
+    except PermissionError:
+        print(f"Warning: Unable to set permissions for {full_path}. You may need sudo.")
+
+# Config Dictionary
 CONFIG = {
     **json_config,  # Merge JSON config into CONFIG
     "DATABASE_PATH": os.path.join(BASE_DIR, "database", "phantomwatch.db"),
@@ -30,8 +47,8 @@ CONFIG = {
     "THREAT_INTEL_REPORT": os.path.join(BASE_DIR, "output", "reports.json"),
     "SIGMA_MATCHES_REPORT": os.path.join(BASE_DIR, "output", "sigma_matches.json"),
     "QUARANTINE_DIR": os.path.join(BASE_DIR, "quarantine"),
-    "FORENSIC REPORT": os.path.join(BASE_DIR, "result", "forensics_report.json"),
-    "MALWARE REPORT": os.path.join(BASE_DIR, "result", "malware_analysis.json"),
+    "FORENSIC_REPORT": os.path.join(BASE_DIR, "result", "forensics_report.json"),
+    "MALWARE_REPORT": os.path.join(BASE_DIR, "result", "malware_analysis.json"),
     "HYBRIDANALYSIS_API_KEY": os.getenv("HYBRIDANALYSIS", "your_api_key_here"),
     "ANYRUN_API_KEY": os.getenv("ANYRUN", "your_api_key_here"),
     "SHODAN_API_KEY": os.getenv("SHODAN", "your_api_key_here"),

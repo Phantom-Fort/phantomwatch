@@ -28,8 +28,6 @@ load_dotenv(CONFIG.get("ENV_PATH", None))
 os.makedirs(CONFIG.get("QUARANTINE_DIR", "quarantine"), exist_ok=True)
 os.makedirs(os.path.dirname(CONFIG.get("LOG_FILE", "../logs/phantomwatch.log")), exist_ok=True)
 
-logger.add(CONFIG.get("LOG_FILE", "../logs/phantomwatch.log"), rotation="10MB", level="INFO", format="{time} - {level} - {message}")
-
 def log_incident(action, target, status):
     """Log an incident response action."""
     conn = sqlite3.connect(CONFIG.get("DATABASE_PATH", "phantomwatch.db"))
