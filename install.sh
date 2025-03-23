@@ -3,7 +3,7 @@
 echo "[+] Installing PhantomWatch as a system package..."
 
 # Install system dependencies
-sudo apt install -y -qq sqlite3 curl wget python3-venv make gcc python3-pip
+sudo apt install -y sqlite3 curl wget python3-venv make gcc python3-pip > /dev/null 2>
 
 # Set up Python virtual environment
 python3 -m venv venv
@@ -17,14 +17,18 @@ echo "[+] Setting up the database..."
 mkdir -p ~/.phantomwatch/database
 sqlite3 ~/.phantomwatch/database/phantomwatch.db < database/schema.sql
 
-# Load environment variables from secrets.env
-echo "[+] Loading environment variables..."
-if [[ -f "config/secrets.env" ]]; then
-    export $(grep -v '^#' config/secrets.env | xargs)
-    echo "[+] Environment variables loaded!"
-else
-    echo "[-] Warning: secrets.env file not found. Skipping environment variable setup."
+# Create and load environment variables from secrets.env
+echo "[+] Creating and loading environment variables..."
+if [ ! -f config/secrets.env ]; then
+    cat <<EOF > config/secrets.env
+# Add your environment variables here
+# Example:
+# export SECRET_KEY="your_secret_key"
+EOF
 fi
+
+export $(grep -v '^#' config/secrets.env | xargs)
+echo "[+] Environment variables created and loaded!"
 
 # Ensure secrets.env is sourced in every new shell session
 echo "[+] Persisting environment variables..."
@@ -41,7 +45,7 @@ fi
 # Install PhantomWatch as a package
 echo "[+] Installing PhantomWatch as a package..."
 sudo rm -rf /usr/local/lib/python3*/dist-packages/phantomwatch
-sudo cp -r phantomwatch /usr/local/lib/python3*/dist-packages/
+sudo cp -r ../phantomwatch /usr/local/lib/python3*/dist-packages/
 
 # Create an executable script
 echo "[+] Creating executable script..."
