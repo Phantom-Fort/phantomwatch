@@ -23,7 +23,7 @@ from modules import (
     exploit_finder
 )
 
-logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
 
 def log_message(message, msg_type="info"):
     """Logs messages using Loguru instead of print statements."""
@@ -40,7 +40,8 @@ def log_message(message, msg_type="info"):
 load_dotenv()
 
 # Load configuration from config.json
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), "../config/config.json")
+INSTALL_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+CONFIG_PATH = os.path.join(INSTALL_DIR, "config", "config.json")
 with open(CONFIG_PATH, "r") as config_file:
     CONFIG = json.load(config_file)
 

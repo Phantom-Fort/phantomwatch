@@ -12,10 +12,12 @@ from commands import interactive_shell
 load_dotenv()
 
 # Configure Loguru logger
-logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
 
 # Load configuration file
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), "../config/config.json")
+INSTALL_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+CONFIG_PATH = os.path.join(INSTALL_DIR, "config", "config.json")
+
 try:
     with open(CONFIG_PATH, "r") as config_file:
         CONFIG = json.load(config_file)

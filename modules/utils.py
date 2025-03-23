@@ -11,7 +11,7 @@ from config.config import CONFIG
 logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
 
 def log_message(message, msg_type="info"):
-    """Logs messages using Loguru instead of print statements."""
+    """Logs messages using Loguru."""
     if msg_type == "success":
         logger.success(message)
     elif msg_type == "error":
@@ -208,7 +208,7 @@ def init_db():
 
     conn.commit()
     conn.close()
-    log_message("Database initialized successfully.", "info")
+    logger.info("Database initialized successfully.")
 
 def store_result(table, log, rule_name, severity="Medium"):
     """Store scan results in the database."""

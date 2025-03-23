@@ -19,10 +19,11 @@ logger.remove()
 
 # Add a simpler handler for terminal output (no timestamps or log levels)
 logger.add(sys.stdout, format="{message}", level="INFO")
-logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
 
 # Load configuration file
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config", "config.json")
+INSTALL_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+CONFIG_PATH = os.path.join(INSTALL_DIR, "config", "config.json")
 CONFIG_PATH = os.path.normpath(CONFIG_PATH)
 
 try:
