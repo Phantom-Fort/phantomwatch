@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config.config import CONFIG
 from .utils import save_output, store_result
 
-logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
 
 def log_message(message, msg_type="info"):
     """Logs messages using Loguru instead of print statements."""
