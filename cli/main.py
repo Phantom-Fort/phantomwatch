@@ -3,13 +3,13 @@ import sys
 import json
 import os
 from loguru import logger
+from dotenv import load_dotenv
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from menu import menu
 from core.banner import display_banner
 from core.soc_tips import get_random_tips
 from core.output_formatter import OutputFormatter
-from dotenv import load_dotenv
-from menu import menu
 
 # Load environment variables
 load_dotenv()
@@ -20,6 +20,7 @@ logger.remove()
 # Add a simpler handler for terminal output (no timestamps or log levels)
 logger.add(sys.stdout, format="{message}", level="INFO")
 logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/error.log", rotation="10MB", level="ERROR", format="{time} | {level} | {message}")
 
 # Load configuration file
 INSTALL_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -30,7 +31,7 @@ try:
     with open(CONFIG_PATH, "r") as config_file:
         CONFIG = json.load(config_file)
 except (FileNotFoundError, json.JSONDecodeError) as e:
-    logger.error(f"Failed to load config from {CONFIG_PATH}: {e}")
+    OutputFormatter.log_message(f"Failed to load config from {CONFIG_PATH}: {e}", "error")
     sys.exit(1)
 
 def initialize_phantomwatch():

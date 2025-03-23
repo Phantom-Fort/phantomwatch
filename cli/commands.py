@@ -24,17 +24,11 @@ from modules import (
 )
 
 logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/error.log", rotation="10MB", level="ERROR", format="{time} | {level} | {message}")
 
 def log_message(message, msg_type="info"):
     """Logs messages using Loguru instead of print statements."""
-    if msg_type == "success":
-        logger.success(message)
-    elif msg_type == "error":
-        logger.error(message)
-    elif msg_type == "warning":
-        logger.warning(message)
-    else:
-        logger.info(message)
+    OutputFormatter.log_message(message, msg_type)
 
 # Load environment variables from .env
 load_dotenv()
@@ -90,9 +84,9 @@ def get_required_flag(module):
     flags = MODULE_FLAGS[module]
 
     if len(flags) > 1:
-        print(f"[INFO] The '{module}' module has multiple flag options:")
+        OutputFormatter.print_message(f"[INFO] The '{module}' module has multiple flag options:", "info")
         for i, flag in enumerate(flags, start=1):
-            print(f"  {i}. {flag}")
+            OutputFormatter.print_message(f"  {i}. {flag}", "info")
 
         try:
             flag_choice = int(input("Enter the number corresponding to the flag you want to use: ").strip())
@@ -140,12 +134,12 @@ def execute_module(module):
     if not user_inputs:
         return  # Abort execution if input is missing
 
-    print(f"[DEBUG] Input: {user_inputs}")  # Debugging print
+    log_message(f"Input: {user_inputs}", "info")  # Debugging log
 
     # Step 3: Execute the module
     try:
         arg_value = user_inputs.popitem()[1]
-        print(f"[DEBUG] Passing argument to {module}: {arg_value}")  # Debugging print
+        log_message(f"Passing argument to {module}: {arg_value}", "info")  # Debugging log
         MODULES[module](arg_value)
         OutputFormatter.print_message(f"[+] Module '{module}' executed successfully.", "success")
         log_message(f"Successfully executed module: {module}", "success")
@@ -166,8 +160,7 @@ def list_modules():
 
 # List of commands for auto-completion
 
-COMMANDS = ["help", "back", "list", "view-api", "use", "run", "set-api", "logs", "reports" "clear", "exit", "quit", "run {module}", "set-api {service} {api_key}", "use {module}"]
-
+COMMANDS = ["help", "back", "list", "view-api", "use", "run", "set-api", "logs", "reports", "clear", "exit", "quit", "run {module}", "set-api {service} {api_key}", "use {module}"]
 
 def completer(text, state):
     options = [cmd for cmd in COMMANDS if cmd.startswith(text)]
@@ -227,7 +220,7 @@ def interactive_shell():
                     # Fetch and display the latest result for the selected module
                     results = get_saved_results(selected_module)
                     if results:
-                        print(f"[+] Latest result for '{selected_module}': {results[-1]}")
+                        OutputFormatter.print_message(f"[+] Latest result for '{selected_module}': {results[-1]}", "success")
                     else:
                         OutputFormatter.print_message(f"[-] No results found for '{selected_module}'.", "warning")
                 else:
@@ -252,15 +245,13 @@ def interactive_shell():
 
             elif cmd.lower() == "run":
                 if selected_module:
-                    execute_module(selected_module)
-                    os.system(f"phantomwatch -m {selected_module}")  # Execute via CLI, if applicable
+                        execute_module(selected_module)
                 else:
                     OutputFormatter.print_message("[-] No module selected. Use 'use <module>' first.", "error")
 
             elif cmd.lower().startswith("run "):
                 module = cmd.split(" ", 1)[1]
                 execute_module(module)
-                os.system(f"phantomwatch -m {module}")  # Execute via CLI, if applicable
 
             elif cmd.lower().startswith("set-api "):
                 parts = cmd.split()
@@ -284,7 +275,7 @@ def set_api_key(service, api_key):
     
     set_key(env_path, service.upper(), api_key)
     OutputFormatter.print_message(f"[+] API key for {service.upper()} set successfully.", "success")
-    log_message(f"API key for {service.upper()} updated.")
+    log_message(f"API key for {service.upper()} updated.", "success")
 
 def view_api_keys():
     """Lists the configured API keys without revealing sensitive values."""
@@ -297,7 +288,7 @@ def view_api_keys():
     OutputFormatter.print_message("[+] Configured API Keys:", "info")
     for key, value in api_keys.items():
         hidden_value = value[:2] + "*" * (len(value) - 4) + value[-2:]  # Show first 2 and last 2 characters
-        print(f"  - {key}: {hidden_value}")
+        OutputFormatter.print_message(f"  - {key}: {hidden_value}", "info")
 
 
 def main():

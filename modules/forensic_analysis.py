@@ -8,6 +8,7 @@ from loguru import logger
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config.config import CONFIG
 from .utils import init_db, store_result, save_output
+from core.output_formatter import OutputFormatter
 
 # Initialize database
 init_db()
@@ -16,17 +17,11 @@ init_db()
 ANALYSIS_OUTPUT = CONFIG.get("FORENSIC_REPORT", "../output/forensic_reports.json")
 
 logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/error.log", rotation="10MB", level="ERROR", format="{time} | {level} | {message}")
 
 def log_message(message, msg_type="info"):
-    """Logs messages using Loguru instead of print statements."""
-    if msg_type == "success":
-        logger.success(message)
-    elif msg_type == "error":
-        logger.error(message)
-    elif msg_type == "warning":
-        logger.warning(message)
-    else:
-        logger.info(message)
+    """Logs messages using OutputFormatter."""
+    OutputFormatter.log_message(message, msg_type)
 
 def analyze_disk(image_path):
     """Extract files and forensic artifacts from a disk image."""
@@ -100,6 +95,7 @@ def run(file_path):
     if forensic_results:
         save_output(forensic_results, ANALYSIS_OUTPUT)
         store_result("forensic_analysis", ANALYSIS_OUTPUT, "Forensic artifacts extracted")
+        OutputFormatter.print_json(forensic_results)
     else:
         log_message("No forensic artifacts found.", "warning")
 
@@ -111,4 +107,3 @@ if __name__ == "__main__":
 
     file_path = sys.argv[1]  # Accepts either a disk image or a memory dump
     run(file_path)
-

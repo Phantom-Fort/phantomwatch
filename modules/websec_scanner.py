@@ -4,23 +4,19 @@ import json
 import os
 import sys
 from loguru import logger
+from tabulate import tabulate
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config.config import CONFIG
 from .utils import save_output, store_result
+from core.output_formatter import OutputFormatter
 
 logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/error.log", rotation="10MB", level="ERROR", format="{time} | {level} | {message}")
 
 def log_message(message, msg_type="info"):
-    """Logs messages using Loguru instead of print statements."""
-    if msg_type == "success":
-        logger.success(message)
-    elif msg_type == "error":
-        logger.error(message)
-    elif msg_type == "warning":
-        logger.warning(message)
-    else:
-        logger.info(message)
+    """Logs messages using OutputFormatter."""
+    OutputFormatter.log_message(message, msg_type)
 
 def is_wordpress(url):
     """Check if a website is running WordPress."""
@@ -92,18 +88,19 @@ def websec_scan(target):
 def run(target_url):
     """Runs the web security scanner on the given URL."""
     
-    print(f"[+] Scanning {target_url} for security vulnerabilities...")
+    OutputFormatter.print_message(f"[+] Scanning {target_url} for security vulnerabilities...", "info")
 
     try:
-        websec_scan(target_url)
+        results = websec_scan(target_url)
+        OutputFormatter.print_json(results)
         log_message(f"Web security scan completed for {target_url}.", "info")
     except Exception as e:
         log_message(f"Error during web security scan: {e}", "error")
-        print(f"[-] Scan failed: {e}")
+        OutputFormatter.print_message(f"[-] Scan failed: {e}", "error")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python -m modules.websec_scanner <target_url>")
+        OutputFormatter.print_message("Usage: python -m modules.websec_scanner <target_url>", "error")
         sys.exit(1)
 
     target_url = sys.argv[1]

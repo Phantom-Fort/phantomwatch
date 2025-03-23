@@ -9,19 +9,15 @@ from loguru import logger
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config.config import CONFIG
 from .utils import store_result, save_output
+from core.output_formatter import OutputFormatter
 
 logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/error.log", rotation="10MB", level="ERROR", format="{time} | {level} | {message}")
+
 
 def log_message(message, msg_type="info"):
     """Logs messages using Loguru instead of print statements."""
-    if msg_type == "success":
-        logger.success(message)
-    elif msg_type == "error":
-        logger.error(message)
-    elif msg_type == "warning":
-        logger.warning(message)
-    else:
-        logger.info(message)
+    OutputFormatter.log_message(message, msg_type)
 
 def shodan_scan(target):
     api_key = CONFIG.get("SHODAN_API_KEY")
@@ -82,35 +78,33 @@ def osint_recon(target):
     save_output(f"osint_{target}.json", results)
     
     log_message(f"OSINT Recon completed. Results saved to output/osint_{target}.json")
-    store_result ("osint_recon", target, "osint_recon")
+    store_result("osint_recon", target, "osint_recon")
     return results
 
 def run(target):
     """Runs OSINT reconnaissance on the given target."""
     
     if not target:
-        print("[-] Error: No target provided.")
+        OutputFormatter.print_message("[-] Error: No target provided.", "error")
         return
 
-    print(f"[+] Running OSINT reconnaissance on: {target}")
+    OutputFormatter.print_message(f"[+] Running OSINT reconnaissance on: {target}", "info")
 
     try:
         results = osint_recon(target) or {}
 
-        log_message(f"OSINT results for {target}: {json.dumps(results, indent=4)}", "info")
+        OutputFormatter.print_message(f"OSINT results for {target}:", "info")
+        OutputFormatter.print_json(results)
         store_result("osint_recon", target, results)
         save_output("osint_recon_results.json", results)
 
-        print(json.dumps(results, indent=4))
-
     except Exception as e:
-        print(f"[-] Error during OSINT reconnaissance: {e}")
+        OutputFormatter.print_message(f"[-] Error during OSINT reconnaissance: {e}", "error")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python -m modules.osint_recon <target>")
+        OutputFormatter.print_message("Usage: python -m modules.osint_recon <target>", "error")
         sys.exit(1)
 
     target = sys.argv[1]  # Get target from CLI
     run(target)
-

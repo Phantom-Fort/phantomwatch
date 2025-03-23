@@ -8,19 +8,15 @@ from loguru import logger
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from .utils import store_result, save_output
+from core.output_formatter import OutputFormatter
 
 logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/error.log", rotation="10MB", level="ERROR", format="{time} | {level} | {message}")
+
 
 def log_message(message, msg_type="info"):
     """Logs messages using Loguru instead of print statements."""
-    if msg_type == "success":
-        logger.success(message)
-    elif msg_type == "error":
-        logger.error(message)
-    elif msg_type == "warning":
-        logger.warning(message)
-    else:
-        logger.info(message)
+    OutputFormatter.log_message(message, msg_type)
 
 def run_masscan(target, ports="1-65535", rate="10000"):
     """Runs Masscan for fast port scanning."""
@@ -75,10 +71,10 @@ def run(target_ip):
     """Scans a given network range."""
     
     if not target_ip:
-        print("[-] Error: No network range provided.")
+        OutputFormatter.print_message("[-] Error: No network range provided.", "error")
         return
 
-    print(f"[+] Scanning network range: {target_ip}")
+    OutputFormatter.print_message(f"[+] Scanning network range: {target_ip}", "info")
 
     try:
         results = scan_network(target_ip) or {}
@@ -87,16 +83,15 @@ def run(target_ip):
         store_result("network_scanner", target_ip, results)
         save_output("network_scan_results.json", results)
 
-        print(json.dumps(results, indent=4))
+        OutputFormatter.print_json(results)
 
     except Exception as e:
-        print(f"[-] Error during network scan: {e}")
+        OutputFormatter.print_message(f"[-] Error during network scan: {e}", "error")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python -m modules.network_scanner <network_range>")
+        OutputFormatter.print_message("Usage: python -m modules.network_scanner <network_range>", "error")
         sys.exit(1)
 
     target_ip = sys.argv[1]  # Get network range from CLI
     run(target_ip)
-

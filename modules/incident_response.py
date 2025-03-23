@@ -12,8 +12,11 @@ from loguru import logger
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from .utils import init_db, store_result, log_incident
 from config.config import CONFIG  # Import config
+from core.output_formatter import OutputFormatter
 
 logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/error.log", rotation="10MB", level="ERROR", format="{time} | {level} | {message}")
+
 
 # Database setup
 init_db()
@@ -88,6 +91,20 @@ def run(log_file):
             "timestamp": datetime.utcnow().isoformat(),
             "output": result.stdout  # Store output for reference
         })
+
+        # Print stored result from the database
+        conn = sqlite3.connect(CONFIG["DATABASE_PATH"])
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM incident_cases ORDER BY timestamp DESC LIMIT 1")
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            formatter = OutputFormatter()
+            formatted_output = formatter.format(row)
+            print("Stored Result:", formatted_output)
+        else:
+            print("No results found in the database.")
 
     except FileNotFoundError:
         print("[-] Error: Volatility is not installed or not found in PATH.")

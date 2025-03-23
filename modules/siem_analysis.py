@@ -15,19 +15,14 @@ from loguru import logger
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from .utils import init_db, store_siem_results, save_output, store_result
 from config.config import CONFIG
+from core.output_formatter import OutputFormatter
 
 logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/error.log", rotation="10MB", level="ERROR", format="{time} | {level} | {message}")
 
 def log_message(message, msg_type="info"):
-    """Logs messages using Loguru instead of print statements."""
-    if msg_type == "success":
-        logger.success(message)
-    elif msg_type == "error":
-        logger.error(message)
-    elif msg_type == "warning":
-        logger.warning(message)
-    else:
-        logger.info(message)
+    """Logs messages using OutputFormatter instead of print statements."""
+    OutputFormatter.log_message(message, msg_type)
 
 # Initialize Database
 init_db()
@@ -123,10 +118,10 @@ def analyze_siem_logs():
         correlation_results = correlate_events()
         
         if alerts or correlation_results:
-            print("[ALERT] Potential Threats Detected!")
-            print(json.dumps({"alerts": alerts, "correlations": correlation_results}, indent=2))
+            OutputFormatter.print_message("[ALERT] Potential Threats Detected!", "warning")
+            OutputFormatter.print_json({"alerts": alerts, "correlations": correlation_results})
         else:
-            print("[INFO] No threats detected in logs.")
+            OutputFormatter.print_message("[INFO] No threats detected in logs.", "info")
     except Exception as e:
         log_message(f"[ERROR] Log analysis failed {str(e)}", "error")
 
@@ -134,25 +129,23 @@ def run(log_file):
     """Runs SIEM log analysis on the given log file."""
     
     if not log_file:
-        print("[-] Error: No SIEM log file provided.")
+        OutputFormatter.print_message("[-] Error: No SIEM log file provided.", "error")
         return
 
-    print(f"[+] Analyzing SIEM logs from: {log_file}")
+    OutputFormatter.print_message(f"[+] Analyzing SIEM logs from: {log_file}", "info")
 
     try:
-        analyze_siem_logs(log_file)
+        analyze_siem_logs()
         log_message(f"SIEM log analysis completed for {log_file}", "info")
         store_result("siem_analysis", log_file, "analysis_completed")
 
     except Exception as e:
-        print(f"[-] Error during SIEM log analysis: {e}")
+        OutputFormatter.print_message(f"[-] Error during SIEM log analysis: {e}", "error")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python -m modules.siem_analysis <log_file>")
+        OutputFormatter.print_message("Usage: python -m modules.siem_analysis <log_file>", "error")
         sys.exit(1)
 
     log_file = sys.argv[1]  # Get log file from CLI
     run(log_file)
-
-

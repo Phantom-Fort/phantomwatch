@@ -10,19 +10,10 @@ from loguru import logger
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config.config import CONFIG
 from .utils import init_db, store_result, save_output
+from core.output_formatter import OutputFormatter
 
 logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
-
-def log_message(message, msg_type="info"):
-    """Logs messages using Loguru instead of print statements."""
-    if msg_type == "success":
-        logger.success(message)
-    elif msg_type == "error":
-        logger.error(message)
-    elif msg_type == "warning":
-        logger.warning(message)
-    else:
-        logger.info(message)
+logger.add("logs/error.log", rotation="10MB", level="ERROR", format="{time} | {level} | {message}")
 
 # Initialize database
 init_db()
@@ -44,23 +35,23 @@ def load_yara_rules():
                 rule_files[file] = rule_path
 
     if not rule_files:
-        log_message("No YARA rules found!", "error")
+        OutputFormatter.log_message("No YARA rules found!", "error")
         return None
 
     try:
         return yara.compile(filepaths=rule_files)
     except yara.SyntaxError as e:
-        log_message(f"YARA syntax error: {e}", "error")
+        OutputFormatter.log_message(f"YARA syntax error: {e}", "error")
         return None
     except yara.Error as e:
-        log_message(f"Failed to compile YARA rules: {e}", "error")
+        OutputFormatter.log_message(f"Failed to compile YARA rules: {e}", "error")
         return None
 
 
 def scan_file_with_yara(file_path):
     """Scan a file using YARA rules and return results."""
     if not os.path.exists(file_path):
-        log_message(f"File {file_path} not found!", "error")
+        OutputFormatter.log_message(f"File {file_path} not found!", "error")
         return []
 
     rules = load_yara_rules()
@@ -80,19 +71,19 @@ def scan_file_with_yara(file_path):
             }
             scan_results.append(result_data)
             store_result("yara_scan", result_data["file"], result_data["rule_name"])
-            log_message(f"[MATCH] {match.rule} detected in {file_path} (Severity: {result_data['severity']})")
+            OutputFormatter.log_message(f"[MATCH] {match.rule} detected in {file_path} (Severity: {result_data['severity']})")
 
         return scan_results
 
     except yara.Error as e:
-        log_message(f"YARA scanning error: {e}", "error")
+        OutputFormatter.log_message(f"YARA scanning error: {e}", "error")
         return []
 
 
 def fetch_hybrid_analysis(file_hash):
     """Fetch threat intelligence from HybridAnalysis API."""
     if not HYBRID_ANALYSIS_API_KEY:
-        log_message("HybridAnalysis API key not set.", "error")
+        OutputFormatter.log_message("HybridAnalysis API key not set.", "error")
         return None
 
     url = "https://www.hybrid-analysis.com/api/v2/search/hash"
@@ -105,7 +96,7 @@ def fetch_hybrid_analysis(file_hash):
     if response.status_code == 200:
         return response.json()
     else:
-        log_message(f"HybridAnalysis API request failed: {response.status_code} - {response.text}", "error")
+        OutputFormatter.log_message(f"HybridAnalysis API request failed: {response.status_code} - {response.text}", "error")
         return None
 
 
@@ -115,33 +106,33 @@ def calculate_file_hash(file_path):
         with open(file_path, "rb") as f:
             return hashlib.sha256(f.read()).hexdigest()
     except Exception as e:
-        log_message(f"Error calculating file hash: {e}", "error")
+        OutputFormatter.log_message(f"Error calculating file hash: {e}", "error")
         return None
 
 
 def run(sample_file):
     """Runs YARA scan and fetches threat intelligence if necessary."""
-    log_message(f"Starting YARA scan on: {sample_file}", "info")
+    OutputFormatter.log_message(f"Starting YARA scan on: {sample_file}", "info")
     
     try:
         scan_results = scan_file_with_yara(sample_file)
         if scan_results:
             save_output(scan_results, SCAN_OUTPUT_FILE)
-            log_message(f"YARA scan completed for {sample_file}.", "info")
+            OutputFormatter.log_message(f"YARA scan completed for {sample_file}.", "info")
 
             # Calculate file hash for threat intelligence
             file_hash = calculate_file_hash(sample_file)
             if file_hash:
-                log_message(f"Fetching HybridAnalysis threat intelligence for hash: {file_hash}", "info")
+                OutputFormatter.log_message(f"Fetching HybridAnalysis threat intelligence for hash: {file_hash}", "info")
                 intel_data = fetch_hybrid_analysis(file_hash)
                 if intel_data:
                     save_output(intel_data, "results/hybrid_analysis_results.json")
-                    log_message(f"Threat intelligence stored for hash {file_hash}.", "info")
+                    OutputFormatter.log_message(f"Threat intelligence stored for hash {file_hash}.", "info")
         else:
-            log_message("No YARA matches found.", "warning")
+            OutputFormatter.log_message("No YARA matches found.", "warning")
 
     except Exception as e:
-        log_message(f"Error running YARA scan: {e}", "error")
+        OutputFormatter.log_message(f"Error running YARA scan: {e}", "error")
 
 
 if __name__ == "__main__":

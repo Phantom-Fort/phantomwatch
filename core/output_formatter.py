@@ -18,6 +18,7 @@ class OutputFormatter:
 
     # Configure Loguru
     logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+    logger.add("logs/error.log", rotation="10MB", level="ERROR", format="{time} | {level} | {message}")
 
     @staticmethod
     def format_message(message, msg_type="info"):

@@ -9,17 +9,11 @@ import sqlite3
 from config.config import CONFIG
 
 logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/error.log", rotation="10MB", level="ERROR", format="{time} | {level} | {message}")
 
 def log_message(message, msg_type="info"):
     """Logs messages using Loguru."""
-    if msg_type == "success":
-        logger.success(message)
-    elif msg_type == "error":
-        logger.error(message)
-    elif msg_type == "warning":
-        logger.warning(message)
-    else:
-        logger.info(message)
+    OutputFormatter.log_message(message, msg_type)
 
 # Load environment variables
 load_dotenv(CONFIG.get("ENV_PATH", None))
@@ -208,7 +202,7 @@ def init_db():
 
     conn.commit()
     conn.close()
-    logger.info("Database initialized successfully.")
+    log_message("[*] Database initialized successfully.", "info")
 
 def store_result(table, log, rule_name, severity="Medium"):
     """Store scan results in the database."""

@@ -22,7 +22,7 @@ fi
 apt install -y sqlite3 curl wget python3-venv make gcc python3-pip > /dev/null 2>&1
 
 # Ensure installation directory exists
-mkdir -p "$INSTALL_DIR" "$LOG_DIR" "$INSTALL_DIR/database"
+mkdir -p "$INSTALL_DIR" "$LOG_DIR" "$INSTALL_DIR/database" "$DB_PATH"
 
 # Ensure necessary permissions
 touch "$LOG_DIR/phantomwatch.log"
@@ -33,7 +33,6 @@ echo "[+] Setting permissions and ownership..."
 chmod +x "$BIN_PATH"
 chown -R $USER:$USER "$INSTALL_DIR"
 chmod 644 "$LOG_DIR/phantomwatch.log"
-chmod 644 "$DB_PATH"
 
 # Copy PhantomWatch files
 cp -r . "$INSTALL_DIR"
@@ -52,14 +51,14 @@ pip install -r requirements.txt > /dev/null 2>&1
 echo "[+] Setting up the database..."
 
 if [[ -f "$SCHEMA_FILE" ]]; then
-    if ! sqlite3 "$DB_PATH" < "$SCHEMA_FILE" 2> "$LOG_DIR/sqlite_error.log"; then
-        echo "[-] Error: Failed to apply database schema. Check $LOG_DIR/sqlite_error.log for details."
+    if ! sqlite3 "$DB_PATH" < "$SCHEMA_FILE" > /dev/null 2> "$LOG_DIR/sqlite_error.log"; then
         exit 1
     fi
 else
-    echo "[-] Error: Database schema file not found at $SCHEMA_FILE."
     exit 1
 fi
+
+chmod 644 "$DB_PATH"
 
 # Load environment variables from secrets.env
 SECRETS_FILE="$INSTALL_DIR/config/secrets.env"

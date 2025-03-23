@@ -13,6 +13,7 @@ load_dotenv()
 
 # Configure Loguru logger
 logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+logger.add("logs/error.log", rotation="10MB", level="ERROR", format="{time} | {level} | {message}")
 
 # Load configuration file
 INSTALL_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
