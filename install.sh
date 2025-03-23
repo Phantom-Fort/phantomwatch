@@ -93,7 +93,9 @@ python3 "$INSTALL_DIR/cli/main.py" "\$@"
 EOF
 
 # Add execution permissions
+echo "[+] Setting permissions and ownership..."
 chmod +x "$BIN_PATH"
+chown $USER:$USER "$INSTALL_DIR"
 chown -R $USER:$USER "$INSTALL_DIR"
 chown $USER:$USER "$LOG_DIR/phantomwatch.log"
 chmod 644 "$LOG_DIR/phantomwatch.log"
