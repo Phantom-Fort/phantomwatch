@@ -3,19 +3,19 @@
 echo "[+] Installing PhantomWatch as a system package..."
 
 # Install system dependencies
-sudo apt install -y sqlite3 curl wget python3-venv make gcc python3-pip > /dev/null 2>
+sudo apt install -y sqlite3 curl wget python3-venv make gcc python3-pip > /dev/null 2>&1
 
 # Set up Python virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
 # Install PhantomWatch as a package
-pip install .
+pip install -r requirements.txt > /dev/null 2>&1
 
 # Apply database schema
 echo "[+] Setting up the database..."
 mkdir -p ~/.phantomwatch/database
-sqlite3 ~/.phantomwatch/database/phantomwatch.db < database/schema.sql
+sqlite3 ~/.phantomwatch/database/phantomwatch.db < database/schema.sql > /dev/null 2>&1
 
 # Create and load environment variables from secrets.env
 echo "[+] Creating and loading environment variables..."

@@ -1,0 +1,28 @@
+        # Core libraries
+        argparse
+        click
+        loguru
+        python-dotenv
+        requests
+        tqdm
+
+        # Data processing
+        pyyaml
+        tabulate
+
+        # Elasticsearch
+        elasticsearch
+        pySigma
+        pySigma-backend-elasticsearch
+
+        # Security tools
+        OTXv2
+        shodan
+        sigmatools
+        yara-python
+
+        # System utilities
+        psutil
+
+        # UI/UX
+        rich
