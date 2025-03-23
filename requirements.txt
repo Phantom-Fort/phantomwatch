@@ -5,6 +5,7 @@
         python-dotenv
         requests
         tqdm
+        pyfiglet
 
         # Data processing
         pyyaml
