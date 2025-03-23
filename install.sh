@@ -17,7 +17,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Install system dependencies
-sudo apt install -y sqlite3 curl wget python3-venv make gcc python3-pip > /dev/null 2>&1
+apt install -y sqlite3 curl wget python3-venv make gcc python3-pip > /dev/null 2>&1
 
 # Ensure installation directory exists
 mkdir -p "$INSTALL_DIR" "$LOG_DIR"
@@ -57,33 +57,32 @@ if ! export $(grep -v '^#' "$INSTALL_DIR/config/secrets.env" | xargs) 2>/dev/nul
     echo "[-] Error: Failed to load environment variables from secrets.env"
 fi
 
-# Ensure secrets.env is sourced in every new shell session
-echo "[+] Persisting environment variables..."
-if [[ "$SHELL" == */zsh ]]; then
-    echo "source $INSTALL_DIR/config/secrets.env" >> ~/.zshrc
-    source ~/.zshrc
-elif [[ "$SHELL" == */bash ]]; then
-    echo "source $INSTALL_DIR/config/secrets.env" >> ~/.bashrc
-    source ~/.bashrc
+# Ensure secrets.env is sourced in the virtual environment's activate script
+VENV_DIR="$INSTALL_DIR/venv"  # Adjust this path to your virtual environment directory
+ACTIVATE_SCRIPT="$VENV_DIR/bin/activate"
+
+echo "[+] Persisting environment variables in the virtual environment..."
+if [ -f "$ACTIVATE_SCRIPT" ]; then
+    echo "source $INSTALL_DIR/config/secrets.env" >> "$ACTIVATE_SCRIPT"
 else
-    echo "[-] Warning: Unable to determine shell. Add 'source $INSTALL_DIR/config/secrets.env' manually to your shell profile."
+    echo "[-] Error: Virtual environment activate script not found."
 fi
 
 # Install PhantomWatch as a package
 echo "[+] Installing PhantomWatch as a package..."
-sudo rm -rf /usr/local/lib/python3*/dist-packages/phantomwatch
-sudo cp -r "$INSTALL_DIR" /usr/local/lib/python3*/dist-packages/
+rm -rf /usr/local/lib/python3*/dist-packages/phantomwatch
+cp -r "$INSTALL_DIR" /usr/local/lib/python3*/dist-packages/
 
 # Create an executable script
 echo "[+] Creating executable script..."
-sudo tee "$BIN_PATH" > /dev/null <<EOF
+tee "$BIN_PATH" > /dev/null <<EOF
 #!/bin/bash
 source "$VENV_DIR/bin/activate"
 python3 "$INSTALL_DIR/cli/main.py" "\$@"
 EOF
 
 # Add execution permissions
-sudo chmod +x "$BIN_PATH"
+chmod +x "$BIN_PATH"
 
 echo "[+] Installation complete! You can now run PhantomWatch using the command: phantomwatch"
 echo "[+] Please restart your shell to apply the changes."
