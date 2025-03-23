@@ -17,7 +17,7 @@ class OutputFormatter:
     DISABLE_COLORS = os.getenv("DISABLE_COLORS", "false").lower() == "true"
 
     # Configure Loguru
-    logger.add("../logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
+    logger.add("logs/phantomwatch.log", rotation="10MB", level="INFO", format="{time} | {level} | {message}")
 
     @staticmethod
     def format_message(message, msg_type="info"):
