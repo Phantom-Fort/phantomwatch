@@ -1,5 +1,5 @@
 -- Table for storing security incidents
-CREATE TABLE incidents (
+CREATE TABLE IF NOT EXISTS incidents (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
@@ -11,12 +11,12 @@ CREATE TABLE incidents (
 );
 
 -- Indexes to optimize queries
-CREATE INDEX idx_incidents_severity ON incidents(severity);
-CREATE INDEX idx_incidents_status ON incidents(status);
-CREATE INDEX idx_incidents_category ON incidents(category);
+CREATE INDEX IF NOT EXISTS idx_incidents_severity ON incidents(severity);
+CREATE INDEX IF NOT EXISTS idx_incidents_status ON incidents(status);
+CREATE INDEX IF NOT EXISTS idx_incidents_category ON incidents(category);
 
 -- Table for threat intelligence data
-CREATE TABLE threat_intel (
+CREATE TABLE IF NOT EXISTS threat_intel (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     source TEXT NOT NULL,
     indicator TEXT NOT NULL UNIQUE,
@@ -27,11 +27,11 @@ CREATE TABLE threat_intel (
 );
 
 -- Indexes for optimized queries
-CREATE INDEX idx_threat_intel_indicator ON threat_intel(indicator);
-CREATE INDEX idx_threat_intel_type ON threat_intel(type);
+CREATE INDEX IF NOT EXISTS idx_threat_intel_indicator ON threat_intel(indicator);
+CREATE INDEX IF NOT EXISTS idx_threat_intel_type ON threat_intel(type);
 
 -- Table for storing logs and alerts
-CREATE TABLE logs (
+CREATE TABLE IF NOT EXISTS logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     module TEXT NOT NULL,
     message TEXT NOT NULL,
@@ -41,12 +41,12 @@ CREATE TABLE logs (
 );
 
 -- Indexes for log searching
-CREATE INDEX idx_logs_module ON logs(module);
-CREATE INDEX idx_logs_level ON logs(level);
-CREATE INDEX idx_logs_timestamp ON logs(timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_logs_module ON logs(module);
+CREATE INDEX IF NOT EXISTS idx_logs_level ON logs(level);
+CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON logs(timestamp DESC);
 
 -- Table for module-specific configurations
-CREATE TABLE module_configs (
+CREATE TABLE IF NOT EXISTS module_configs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     module_name TEXT NOT NULL UNIQUE,
     config_data TEXT NOT NULL, -- Stores JSON data for module-specific settings
@@ -54,7 +54,7 @@ CREATE TABLE module_configs (
 );
 
 -- Table for API keys and credentials
-CREATE TABLE api_keys (
+CREATE TABLE IF NOT EXISTS api_keys (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     module_name TEXT NOT NULL UNIQUE,
     key_name TEXT NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE api_keys (
 );
 
 -- Table for storing scheduled tasks (cron jobs, automation)
-CREATE TABLE scheduled_tasks (
+CREATE TABLE IF NOT EXISTS scheduled_tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     task_name TEXT NOT NULL,
     module_name TEXT NOT NULL,
@@ -74,7 +74,7 @@ CREATE TABLE scheduled_tasks (
 );
 
 -- Table for tracking module execution history
-CREATE TABLE module_execution_history (
+CREATE TABLE IF NOT EXISTS module_execution_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     module_name TEXT NOT NULL,
     execution_status TEXT CHECK( execution_status IN ('Success', 'Failure') ) NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE module_execution_history (
 );
 
 -- Table for access control and role-based permissions
-CREATE TABLE access_control (
+CREATE TABLE IF NOT EXISTS access_control (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
     role TEXT CHECK( role IN ('Admin', 'User', 'Viewer', 'Analyst') ) NOT NULL,
