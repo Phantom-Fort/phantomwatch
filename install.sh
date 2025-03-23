@@ -28,6 +28,13 @@ mkdir -p "$INSTALL_DIR" "$LOG_DIR" "$INSTALL_DIR/database"
 touch "$LOG_DIR/phantomwatch.log"
 chmod -R 755 "$INSTALL_DIR"
 
+# Add execution permissions
+echo "[+] Setting permissions and ownership..."
+chmod +x "$BIN_PATH"
+chown -R $USER:$USER "$INSTALL_DIR"
+chmod 644 "$LOG_DIR/phantomwatch.log"
+chmod 644 "$DB_PATH"
+
 # Copy PhantomWatch files
 cp -r . "$INSTALL_DIR"
 
@@ -91,15 +98,6 @@ tee "$BIN_PATH" > /dev/null <<EOF
 source "$VENV_DIR/bin/activate"
 python3 "$INSTALL_DIR/cli/main.py" "\$@"
 EOF
-
-# Add execution permissions
-echo "[+] Setting permissions and ownership..."
-chmod +x "$BIN_PATH"
-chown $USER:$USER "$INSTALL_DIR"
-chown -R $USER:$USER "$INSTALL_DIR"
-chown $USER:$USER "$LOG_DIR/phantomwatch.log"
-chmod 644 "$LOG_DIR/phantomwatch.log"
-chmod 644 "$DB_PATH"
 
 
 echo "[+] Installation complete! You can now run PhantomWatch using the command: phantomwatch"
