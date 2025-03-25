@@ -104,16 +104,3 @@ sudo chmod +x "$BIN_PATH"
 
 echo "[+] Installation complete! You can now run PhantomWatch using the command: phantomwatch"
 echo "[+] Please restart your shell to apply the changes."
-
-# Ask user if they want to install Elasticsearch
-
-read -p "Do you want to install Elasticsearch? filesize ~ 700mb (y/n): " install_es
-
-if [[ "$install_es" == "y" || "$install_es" == "Y" ]]; then
-    echo "[+] Installing Elasticsearch..."
-    wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.6.0-amd64.deb
-    sudo dpkg -i elasticsearch-8.6.0-amd64.deb
-    echo "[+] Elasticsearch installation complete!"
-else
-    echo "[-] Skipping Elasticsearch installation."
-fi
