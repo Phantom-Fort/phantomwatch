@@ -29,11 +29,15 @@ init_db()
 
 # Elasticsearch Configuration
 ELASTICSEARCH_HOST = CONFIG.get("ELASTICSEARCH_HOST", "http://localhost:9200")
+ELASTICSEARCH_API_KEY = CONFIG.get("ELASTICSEARCH_API_KEY", "")
 INDEX_NAME = "logs-*"
 SIGMA_RULES_FILE = CONFIG["SIGMA_RULES_PATH"]
 
-# Initialize Elasticsearch client
-es = Elasticsearch([ELASTICSEARCH_HOST])
+# Initialize Elasticsearch client with API key
+es = Elasticsearch(
+    [ELASTICSEARCH_HOST],
+    api_key=ELASTICSEARCH_API_KEY
+)
 
 # Load Sigma rules
 def load_sigma_rules(rule_file):

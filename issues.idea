@@ -1,0 +1,12 @@
+Network scanner:
+
+Enter the network range: 192.168.0.1/24
+Input: {'network range': '192.168.0.1/24'}
+Passing argument to network-scanner: 192.168.0.1/24
+[+] Scanning network range: 192.168.0.1/24
+Masscan error: Command '['masscan', '192.168.0.1/24', '-p', '1-65535', '--rate', '10000', '--output-format', 'json']' returned non-zero exit status 1.
+Scan results for 192.168.0.1/24: {
+    "error": "Command '['masscan', '192.168.0.1/24', '-p', '1-65535', '--rate', '10000', '--output-format', 'json']' returned non-zero exit status 1."
+}
+
+
