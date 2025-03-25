@@ -12,6 +12,12 @@ SCHEMA_FILE="$INSTALL_DIR/database/schema.sql"
 
 echo "[+] Installing PhantomWatch as a system package..."
 
+# Check if the user has sudo privileges
+if ! sudo -v > /dev/null 2>&1; then
+    echo "[-] Error: You do not have sudo privileges. Please run this script with a user that has sudo privileges."
+    exit 1
+fi
+
 # Install system dependencies
 echo "[+] Installing system dependencies..."
 sudo apt install -y sqlite3 curl wget python3-venv make gcc python3-pip > /dev/null 2>&1
