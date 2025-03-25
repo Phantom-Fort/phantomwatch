@@ -12,25 +12,22 @@ SCHEMA_FILE="$INSTALL_DIR/database/schema.sql"
 
 echo "[+] Installing PhantomWatch as a system package..."
 
-# Ensure script is run with sudo
-if [[ $EUID -ne 0 ]]; then
-    echo "[-] Please run this script as root (sudo)." 
-    exit 1
-fi
-
 # Install system dependencies
 echo "[+] Installing system dependencies..."
-apt install -y sqlite3 curl wget python3-venv make gcc python3-pip > /dev/null 2>&1
+sudo apt install -y sqlite3 curl wget python3-venv make gcc python3-pip > /dev/null 2>&1
 
 # Ensure installation directory exists
 echo "[+] Creating installation directories..."
-mkdir -p "$INSTALL_DIR" "$LOG_DIR" "$INSTALL_DIR/database"
+sudo mkdir -p "$INSTALL_DIR" "$LOG_DIR" "$INSTALL_DIR/database"
 
 # Ensure necessary permissions
 echo "[+] Setting up permissions..."
-touch "$LOG_DIR/phantomwatch.log"
-chmod -R 755 "$INSTALL_DIR"
-chmod 644 "$LOG_DIR/phantomwatch.log"
+sudo touch "$LOG_DIR/phantomwatch.log"
+sudo chmod -R 755 "$INSTALL_DIR"
+sudo chmod 644 "$LOG_DIR/phantomwatch.log"
+
+# Change ownership to the current user
+sudo chown -R $USER:$USER "$INSTALL_DIR"
 
 # Copy PhantomWatch files
 echo "[+] Copying PhantomWatch files..."
@@ -92,21 +89,18 @@ fi
 
 # Install PhantomWatch as a package
 echo "[+] Installing PhantomWatch as a package..."
-rm -rf /usr/local/lib/python3*/dist-packages/phantomwatch
-cp -r "$INSTALL_DIR" /usr/local/lib/python3*/dist-packages/
+sudo rm -rf /usr/local/lib/python3*/dist-packages/phantomwatch
+sudo cp -r "$INSTALL_DIR" /usr/local/lib/python3*/dist-packages/
 
 # Create an executable script
 echo "[+] Creating executable script..."
-tee "$BIN_PATH" > /dev/null <<EOF
+sudo tee "$BIN_PATH" > /dev/null <<EOF
 #!/bin/bash
 source "$VENV_DIR/bin/activate"
 python3 "$INSTALL_DIR/cli/main.py" "\$@"
 EOF
 
-chmod +x "$BIN_PATH"
+sudo chmod +x "$BIN_PATH"
 
 echo "[+] Installation complete! You can now run PhantomWatch using the command: phantomwatch"
 echo "[+] Please restart your shell to apply the changes."
-
-echo "[+] Fixing common issue: setting ownership of installation directory..."
-chown -R $USER:$USER /opt/phantomwatch
