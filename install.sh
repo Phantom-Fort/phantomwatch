@@ -68,6 +68,7 @@ if [ ! -f "$SECRETS_FILE" ]; then
 # Add your environment variables here
 # Example:
 # export SECRET_KEY="your_secret_key"
+
 EOF
 fi
 
@@ -101,3 +102,5 @@ EOF
 
 echo "[+] Installation complete! You can now run PhantomWatch using the command: phantomwatch"
 echo "[+] Please restart your shell to apply the changes."
+
+echo {CCommon Issue Fix} run this command after installation: chown -R $USER:$USER /opt/phantomwatch
